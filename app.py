@@ -458,7 +458,7 @@ if "active_user_id" not in st.session_state:
 h_col1, h_col2, h_col3 = st.columns([2.2, 2.0, 1.8])
 with h_col1:
     st.markdown("## 📈 Earnings**Beat**")
-    st.caption("Weekly Stock Prediction League • >$50B Cap")
+    st.caption("Predict stock price direction after earnings • >$50B Cap")
 
 with h_col2:
     user_labels = ["— Select who you are —"] + [f"{u['avatar']} {u['name']}" for u in data["users"]]
@@ -527,7 +527,7 @@ st.divider()
 
 # Main Navigation Tabs
 tab_matchups, tab_leaderboard = st.tabs([
-    "🎯 Weekly Matchups & Voting", 
+    "📈 Price Direction Picks", 
     "🏆 Friends Leaderboard"
 ])
 
@@ -546,6 +546,7 @@ with tab_matchups:
     stat_c2.metric("Your Predictions", f"{my_votes_count} / {total_stocks}")
     stat_c3.metric("Active League Members", len(data["users"]))
     
+    st.caption("🟢 **UP** = stock price goes UP after earnings report &nbsp;|&nbsp; 🔴 **DOWN** = price drops &nbsp;|&nbsp; ⚪ **NEUTRAL** = roughly flat")
     st.divider()
     
     if not stocks:
