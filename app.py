@@ -81,6 +81,7 @@ DEFAULT_DATA = {
                     "timing": "AMC (After Close)",
                     "price": 665.00,
                     "eps_est": 1.85,
+                    "market_cap_b": 182.4,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -93,6 +94,7 @@ DEFAULT_DATA = {
                     "timing": "AMC (After Close)",
                     "price": 575.00,
                     "eps_est": 3.28,
+                    "market_cap_b": 87.2,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -105,6 +107,7 @@ DEFAULT_DATA = {
                     "timing": "AMC (After Close)",
                     "price": 128.50,
                     "eps_est": 0.68,
+                    "market_cap_b": 3150.0,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -117,6 +120,7 @@ DEFAULT_DATA = {
                     "timing": "AMC (After Close)",
                     "price": 265.40,
                     "eps_est": 0.98,
+                    "market_cap_b": 64.8,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -129,6 +133,7 @@ DEFAULT_DATA = {
                     "timing": "AMC (After Close)",
                     "price": 132.80,
                     "eps_est": 0.16,
+                    "market_cap_b": 44.5,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -141,6 +146,7 @@ DEFAULT_DATA = {
                     "timing": "AMC (After Close)",
                     "price": 260.00,
                     "eps_est": 2.35,
+                    "market_cap_b": 252.1,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -153,6 +159,7 @@ DEFAULT_DATA = {
                     "timing": "AMC (After Close)",
                     "price": 139.10,
                     "eps_est": 1.73,
+                    "market_cap_b": 98.6,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -165,6 +172,99 @@ DEFAULT_DATA = {
                     "timing": "BMO (Before Open)",
                     "price": 142.10,
                     "eps_est": 2.73,
+                    "market_cap_b": 195.4,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                }
+            ]
+        },
+        {
+            "id": "week-2026-35",
+            "name": "Week 35 (Aug 31 - Sep 04, 2026)",
+            "date_range": "Aug 31 - Sep 04, 2026",
+            "stocks": [
+                {
+                    "id": "s-w35-1",
+                    "ticker": "AVGO",
+                    "company": "Broadcom Inc.",
+                    "date": "Sep 03 (Thu)",
+                    "timing": "AMC (After Close)",
+                    "price": 160.50,
+                    "eps_est": 1.20,
+                    "market_cap_b": 750.2,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-2",
+                    "ticker": "LULU",
+                    "company": "Lululemon Athletica",
+                    "date": "Sep 03 (Thu)",
+                    "timing": "AMC (After Close)",
+                    "price": 270.00,
+                    "eps_est": 2.95,
+                    "market_cap_b": 34.2,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-3",
+                    "ticker": "NIO",
+                    "company": "NIO Inc.",
+                    "date": "Sep 04 (Fri)",
+                    "timing": "BMO (Before Open)",
+                    "price": 4.10,
+                    "eps_est": -0.31,
+                    "market_cap_b": 8.5,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                }
+            ]
+        },
+        {
+            "id": "week-2026-36",
+            "name": "Week 36 (Sep 07 - Sep 11, 2026)",
+            "date_range": "Sep 07 - Sep 11, 2026",
+            "stocks": [
+                {
+                    "id": "s-w36-1",
+                    "ticker": "ORCL",
+                    "company": "Oracle Corporation",
+                    "date": "Sep 09 (Wed)",
+                    "timing": "AMC (After Close)",
+                    "price": 140.00,
+                    "eps_est": 1.33,
+                    "market_cap_b": 385.0,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w36-2",
+                    "ticker": "ADBE",
+                    "company": "Adobe Inc.",
+                    "date": "Sep 11 (Fri)",
+                    "timing": "AMC (After Close)",
+                    "price": 550.00,
+                    "eps_est": 4.53,
+                    "market_cap_b": 245.0,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w36-3",
+                    "ticker": "KR",
+                    "company": "Kroger Co.",
+                    "date": "Sep 11 (Fri)",
+                    "timing": "BMO (Before Open)",
+                    "price": 52.00,
+                    "eps_est": 0.91,
+                    "market_cap_b": 37.5,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
