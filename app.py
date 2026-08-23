@@ -438,7 +438,7 @@ def sync_daily_stock_data(data):
             save_data(data)
 
 # Vote Authentication Password
-VOTE_PASSWORD = "stock2026"
+VOTE_PASSWORD = st.secrets.get("app", {}).get("passcode", "stock2026")
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
