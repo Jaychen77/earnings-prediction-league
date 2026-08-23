@@ -177,12 +177,39 @@ DEFAULT_DATA = {
 SCHEMA_VERSION = "v3"
 DATA_FILE = os.path.join(os.path.dirname(__file__), f"league_data_{SCHEMA_VERSION}.json")
 
+# Google Sheets Permanent Connection Helper
+def get_gsheets_connection():
+    try:
+        from streamlit_gsheets import GSheetsConnection
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        return conn
+    except Exception:
+        return None
+
 def load_data():
+    conn = get_gsheets_connection()
+    if conn:
+        try:
+            df = conn.read(worksheet="league_state", ttl=0)
+            if df is not None and not df.empty and "json_data" in df.columns:
+                saved = json.loads(df["json_data"].iloc[0])
+                for def_week in DEFAULT_DATA["weeks"]:
+                    saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
+                    if saved_week:
+                        existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
+                        for s in def_week.get("stocks", []):
+                            if s["ticker"] not in existing_tickers:
+                                saved_week["stocks"].append(s)
+                    else:
+                        saved.setdefault("weeks", []).append(def_week)
+                return saved
+        except Exception:
+            pass
+
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, "r") as f:
                 saved = json.load(f)
-                # Ensure all default week stocks exist in saved
                 for def_week in DEFAULT_DATA["weeks"]:
                     saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
                     if saved_week:
@@ -198,8 +225,21 @@ def load_data():
     return DEFAULT_DATA
 
 def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    # Save to local file
+    try:
+        with open(DATA_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
+    
+    # Save to Google Sheets if connected
+    conn = get_gsheets_connection()
+    if conn:
+        try:
+            df = pd.DataFrame([{"json_data": json.dumps(data), "updated_at": datetime.now().isoformat()}])
+            conn.update(worksheet="league_state", data=df)
+        except Exception:
+            pass
 
 @st.cache_data(ttl=86400) # Auto-refresh daily (every 24 hours)
 def fetch_live_stock_data(ticker_list):
