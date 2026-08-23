@@ -56,11 +56,9 @@ DATA_FILE = os.path.join(os.path.dirname(__file__), "league_data.json")
 # Default Sample Data
 DEFAULT_DATA = {
     "users": [
-        {"id": "user-1", "name": "Alex M. (You)", "avatar": "🦁"},
-        {"id": "user-2", "name": "Brian K.", "avatar": "🚀"},
-        {"id": "user-3", "name": "Chloe T.", "avatar": "🐺"},
-        {"id": "user-4", "name": "David L.", "avatar": "🦉"},
-        {"id": "user-5", "name": "Emma R.", "avatar": "⚡"}
+        {"id": "user-1", "name": "Jay (You)", "avatar": "🦁"},
+        {"id": "user-2", "name": "Stan", "avatar": "🚀"},
+        {"id": "user-3", "name": "Edwin", "avatar": "🐺"}
     ],
     "weeks": [
         {
@@ -78,7 +76,7 @@ DEFAULT_DATA = {
                     "eps_est": 0.85,
                     "actual_dir": "UP",
                     "actual_pct": 7.2,
-                    "votes": {"user-1": "UP", "user-2": "UP", "user-3": "DOWN", "user-4": "UP", "user-5": "UP"}
+                    "votes": {"user-1": "UP", "user-2": "UP", "user-3": "DOWN"}
                 },
                 {
                     "id": "s-2",
@@ -90,7 +88,7 @@ DEFAULT_DATA = {
                     "eps_est": 0.65,
                     "actual_dir": "UP",
                     "actual_pct": 6.5,
-                    "votes": {"user-1": "UP", "user-2": "DOWN", "user-3": "UP", "user-4": "UP", "user-5": "DOWN"}
+                    "votes": {"user-1": "UP", "user-2": "DOWN", "user-3": "UP"}
                 },
                 {
                     "id": "s-3",
@@ -102,7 +100,7 @@ DEFAULT_DATA = {
                     "eps_est": 2.18,
                     "actual_dir": "UP",
                     "actual_pct": 11.2,
-                    "votes": {"user-1": "DOWN", "user-2": "DOWN", "user-3": "UP", "user-4": "DOWN", "user-5": "DOWN"}
+                    "votes": {"user-1": "DOWN", "user-2": "DOWN", "user-3": "UP"}
                 }
             ]
         },
@@ -121,7 +119,7 @@ DEFAULT_DATA = {
                     "eps_est": 0.68,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-1": "UP", "user-2": "UP", "user-3": "DOWN", "user-4": "UP"}
+                    "votes": {"user-1": "UP", "user-2": "UP", "user-3": "DOWN"}
                 },
                 {
                     "id": "s-5",
@@ -133,7 +131,7 @@ DEFAULT_DATA = {
                     "eps_est": 0.98,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-1": "DOWN", "user-2": "DOWN", "user-3": "DOWN", "user-5": "UP"}
+                    "votes": {"user-1": "DOWN", "user-2": "DOWN", "user-3": "UP"}
                 },
                 {
                     "id": "s-6",
@@ -145,7 +143,7 @@ DEFAULT_DATA = {
                     "eps_est": 0.16,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-2": "UP", "user-3": "UP", "user-4": "DOWN"}
+                    "votes": {"user-2": "UP", "user-3": "UP"}
                 },
                 {
                     "id": "s-7",
@@ -157,7 +155,7 @@ DEFAULT_DATA = {
                     "eps_est": 1.73,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-1": "UP", "user-3": "UP", "user-5": "UP"}
+                    "votes": {"user-1": "UP", "user-3": "UP"}
                 }
             ]
         }
