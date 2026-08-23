@@ -497,7 +497,7 @@ with h_col3:
 
 # Show prompt if no user selected
 if active_user_id is None:
-    st.info("👆 **Please select who you are** from the dropdown above to cast your predictions.")
+    st.error("👆 **Please select who you are** from the dropdown above to cast your predictions.")
 
 
 # Protected Controls: Add Member - ONLY visible if passcode unlocked
