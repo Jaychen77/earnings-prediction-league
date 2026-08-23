@@ -297,15 +297,29 @@ if "data" not in st.session_state:
 data = st.session_state.data
 
 # Top Bar Header: Voter Selector, Add User for Jay, & League Branding
-h_col1, h_col2 = st.columns([3, 2])
+h_col1, h_col2, h_col3 = st.columns([2.5, 1.8, 1.7])
 with h_col1:
     st.markdown("## 📈 Earnings**Beat**")
-    st.caption("Weekly Stock Up/Down Prediction League • Mega & Large Caps (>$50B Market Cap)")
+    st.caption("Weekly Stock Up/Down Prediction League (>$50B Cap)")
 
 with h_col2:
     user_options = {f"{u['avatar']} {u['name']}": u['id'] for u in data["users"]}
     selected_user_label = st.selectbox("🎯 Voting As:", list(user_options.keys()), index=0)
     active_user_id = user_options[selected_user_label]
+
+with h_col3:
+    if not st.session_state.authenticated:
+        pass_val = st.text_input("🔑 Passcode (to vote)", key="global_pass_key", placeholder="e.g. stock2026")
+        if pass_val:
+            if pass_val.strip() == VOTE_PASSWORD:
+                st.session_state.authenticated = True
+                st.success("Unlocked!")
+                st.rerun()
+            else:
+                st.caption("❌ Invalid passcode")
+    else:
+        st.write("")
+        st.caption("🔓 **Voting Unlocked**")
 
 # Commissioner Control: Add User & Add Stock (> $50B Market Cap)
 c_bar1, c_bar2 = st.columns(2)
@@ -462,17 +476,6 @@ with tab_matchups:
                     st.caption(" ".join(chips))
             
             with row_c5:
-                if not st.session_state.authenticated:
-                    with st.popover("🔒 Unlock PIN"):
-                        st.caption("Enter PIN to vote:")
-                        pin_try = st.text_input("PIN", type="password", key=f"pin_{stock['id']}", autocomplete="new-password")
-                        if st.button("Unlock", key=f"btn_unlock_{stock['id']}", use_container_width=True):
-                            if pin_try.strip() == VOTE_PASSWORD:
-                                st.session_state.authenticated = True
-                                st.rerun()
-                            else:
-                                st.error("Wrong PIN")
-                
                 b1, b2, b3 = st.columns(3)
                 with b1:
                     btn_up_type = "primary" if my_vote == "UP" else "secondary"
