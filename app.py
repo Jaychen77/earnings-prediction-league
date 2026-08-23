@@ -319,102 +319,80 @@ DEFAULT_DATA = {
 
 SCHEMA_VERSION = "v3"
 DATA_FILE = os.path.join(os.path.dirname(__file__), f"league_data_{SCHEMA_VERSION}.json")
+GITHUB_REPO = "Jaychen77/earnings-prediction-league"
+GITHUB_PATH = f"league_data_{SCHEMA_VERSION}.json"
 
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1RvnYDs3lRK1j50l8K3_LV2fbrJhQgXmBJnSN3UNEXtM/edit?gid=0#gid=0"
-
-# Google Sheets Permanent Connection Helper
-def get_gsheets_connection():
-    try:
-        from streamlit_gsheets import GSheetsConnection
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        return conn
-    except Exception:
-        return None
+# --- GitHub API Persistence ---
+def _merge_defaults(saved):
+    """Merge any missing default stocks/weeks into saved data."""
+    for def_week in DEFAULT_DATA["weeks"]:
+        saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
+        if saved_week:
+            existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
+            for s in def_week.get("stocks", []):
+                if s["ticker"] not in existing_tickers:
+                    saved_week["stocks"].append(s)
+        else:
+            saved.setdefault("weeks", []).append(def_week)
+    return saved
 
 def load_data():
-    conn = get_gsheets_connection()
-    if conn:
-        try:
-            df = conn.read(worksheet="league_state", ttl=0)
-            if df is not None and not df.empty:
-                raw_json = None
-                if "_raw_state" in df.columns and pd.notna(df["_raw_state"].iloc[0]):
-                    raw_json = df["_raw_state"].iloc[0]
-                elif "json_data" in df.columns and pd.notna(df["json_data"].iloc[0]):
-                    raw_json = df["json_data"].iloc[0]
-                
-                if raw_json:
-                    saved = json.loads(raw_json)
-                    for def_week in DEFAULT_DATA["weeks"]:
-                        saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
-                        if saved_week:
-                            existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
-                            for s in def_week.get("stocks", []):
-                                if s["ticker"] not in existing_tickers:
-                                    saved_week["stocks"].append(s)
-                        else:
-                            saved.setdefault("weeks", []).append(def_week)
-                    return saved
-        except Exception:
-            pass
+    # 1. Try loading from GitHub
+    try:
+        token = st.secrets.get("github", {}).get("token", "")
+        headers = {"Accept": "application/vnd.github.v3.raw"}
+        if token:
+            headers["Authorization"] = f"token {token}"
+        resp = __import__("requests").get(
+            f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/{GITHUB_PATH}",
+            headers=headers, timeout=5
+        )
+        if resp.status_code == 200:
+            saved = resp.json()
+            return _merge_defaults(saved)
+    except Exception:
+        pass
 
+    # 2. Fallback: local file
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, "r") as f:
-                saved = json.load(f)
-                for def_week in DEFAULT_DATA["weeks"]:
-                    saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
-                    if saved_week:
-                        existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
-                        for s in def_week.get("stocks", []):
-                            if s["ticker"] not in existing_tickers:
-                                saved_week["stocks"].append(s)
-                    else:
-                        saved.setdefault("weeks", []).append(def_week)
-                return saved
+                return _merge_defaults(json.load(f))
         except Exception:
             pass
+
     return DEFAULT_DATA
 
-def format_sheet_tables(data):
-    # 1. Matchups & Votes Table
-    rows = []
-    for w in data.get("weeks", []):
-        for s in w.get("stocks", []):
-            r = {
-                "Week": w.get("name", ""),
-                "Ticker": s.get("ticker", ""),
-                "Company": s.get("company", ""),
-                "Date": s.get("date", ""),
-                "Timing": s.get("timing", ""),
-                "Price ($)": s.get("price", ""),
-                "Est. EPS": s.get("eps_est", ""),
-                "Cap ($B)": s.get("market_cap_b", ""),
-            }
-            # Friend picks
-            for u in data.get("users", []):
-                r[f"Pick_{u['name']}"] = s.get("votes", {}).get(u["id"], "—")
-            rows.append(r)
-    df_votes = pd.DataFrame(rows)
-    return df_votes
-
 def save_data(data):
-    # Save to local backup file
+    # Always write local file
     try:
         with open(DATA_FILE, "w") as f:
             json.dump(data, f, indent=2)
     except Exception:
         pass
-    
-    # Save directly to Google Sheets
-    conn = get_gsheets_connection()
-    if conn:
-        try:
-            df_table = format_sheet_tables(data)
-            df_table["_raw_state"] = json.dumps(data)
-            conn.update(worksheet="league_state", data=df_table)
-        except Exception:
-            pass
+
+    # Push to GitHub via API
+    try:
+        token = st.secrets.get("github", {}).get("token", "")
+        if not token:
+            return
+        import requests, base64
+        api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
+        headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+        # Get current SHA (needed for update)
+        get_resp = requests.get(api_url, headers=headers, timeout=5)
+        sha = get_resp.json().get("sha", "") if get_resp.status_code == 200 else ""
+        content = base64.b64encode(json.dumps(data, indent=2).encode()).decode()
+        payload = {
+            "message": f"Auto-save: league data {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            "content": content,
+            "branch": "main"
+        }
+        if sha:
+            payload["sha"] = sha
+        requests.put(api_url, headers=headers, json=payload, timeout=10)
+    except Exception:
+        pass
 
 @st.cache_data(ttl=86400) # Auto-refresh daily (every 24 hours)
 def fetch_live_stock_data(ticker_list):
