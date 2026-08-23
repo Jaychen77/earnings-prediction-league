@@ -144,8 +144,44 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
+@st.cache_data(ttl=86400) # Auto-refresh daily (every 24 hours)
+def fetch_live_stock_data(ticker_list):
+    results = {}
+    for ticker in ticker_list:
+        try:
+            t_obj = yf.Ticker(ticker)
+            info = t_obj.info or {}
+            p = info.get("currentPrice") or info.get("previousClose") or info.get("regularMarketPrice")
+            eps = info.get("forwardEps") or info.get("trailingEps")
+            results[ticker] = {
+                "price": float(p) if p else None,
+                "eps_est": float(eps) if eps else None
+            }
+        except Exception:
+            results[ticker] = {"price": None, "eps_est": None}
+    return results
+
+def sync_daily_stock_data(data):
+    # Collect all tickers across weeks
+    all_tickers = list({s["ticker"] for w in data.get("weeks", []) for s in w.get("stocks", [])})
+    if all_tickers:
+        live_info = fetch_live_stock_data(tuple(all_tickers))
+        updated = False
+        for w in data.get("weeks", []):
+            for s in w.get("stocks", []):
+                t_data = live_info.get(s["ticker"], {})
+                if t_data.get("price") and s.get("price") != t_data["price"]:
+                    s["price"] = t_data["price"]
+                    updated = True
+                if t_data.get("eps_est") and s.get("eps_est") != t_data["eps_est"]:
+                    s["eps_est"] = t_data["eps_est"]
+                    updated = True
+        if updated:
+            save_data(data)
+
 if "data" not in st.session_state:
     st.session_state.data = load_data()
+    sync_daily_stock_data(st.session_state.data)
 
 data = st.session_state.data
 
@@ -191,31 +227,9 @@ tab_matchups, tab_leaderboard = st.tabs([
 
 # Tab 1: Weekly Matchups & Voting
 with tab_matchups:
-    top_c1, top_c2 = st.columns([3, 1])
-    with top_c1:
-        weeks_dict = {w["name"]: w["id"] for w in data["weeks"]}
-        selected_week_name = st.selectbox("📅 Select Week Round:", list(weeks_dict.keys()), index=0)
-        current_week = next(w for w in data["weeks"] if w["id"] == weeks_dict[selected_week_name])
-    with top_c2:
-        st.write("")
-        st.write("")
-        if st.button("🔄 Auto-Update via yfinance", use_container_width=True):
-            with st.spinner("Fetching live stock prices and EPS estimates..."):
-                for stock in current_week.get("stocks", []):
-                    try:
-                        t_obj = yf.Ticker(stock["ticker"])
-                        info = t_obj.info or {}
-                        p = info.get("currentPrice") or info.get("previousClose") or info.get("regularMarketPrice")
-                        eps = info.get("forwardEps") or info.get("trailingEps")
-                        if p:
-                            stock["price"] = float(p)
-                        if eps:
-                            stock["eps_est"] = float(eps)
-                    except Exception:
-                        pass
-                save_data(data)
-                st.success("Updated live market data!")
-                st.rerun()
+    weeks_dict = {w["name"]: w["id"] for w in data["weeks"]}
+    selected_week_name = st.selectbox("📅 Select Week Round:", list(weeks_dict.keys()), index=0)
+    current_week = next(w for w in data["weeks"] if w["id"] == weeks_dict[selected_week_name])
     
     stocks = current_week.get("stocks", [])
     total_stocks = len(stocks)
