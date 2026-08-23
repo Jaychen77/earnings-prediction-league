@@ -334,6 +334,40 @@ def _merge_defaults(saved):
             saved.setdefault("weeks", []).append(def_week)
     return saved
 
+def is_stock_locked(stock):
+    """Checks if a stock has reported earnings (actual_dir present) or if 1 hour before earnings cutoff passed."""
+    if stock.get("actual_dir") is not None:
+        return True, "Reported (Locked)"
+    
+    # Check by report date & timing if parseable
+    d_str = stock.get("date", "")
+    timing = stock.get("timing", "")
+    months = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, 
+              "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
+    try:
+        now = datetime.now()
+        for m_name, m_num in months.items():
+            if m_name in d_str.lower():
+                import re
+                day_match = re.search(r'\b(\d{1,2})\b', d_str)
+                if day_match:
+                    day = int(day_match.group(1))
+                    year = now.year
+                    
+                    # 1 hour before earnings:
+                    # BMO reports at 9:00 AM ET -> Cutoff is 8:00 AM ET
+                    # AMC reports at 4:00 PM ET -> Cutoff is 3:00 PM ET
+                    hour = 15 if "AMC" in timing.upper() else 8
+                    lock_time = datetime(year, m_num, day, hour, 0)
+                    
+                    if now > lock_time:
+                        return True, "Cutoff Passed (1h before earnings)"
+    except Exception:
+        pass
+        
+    return False, ""
+
+
 def get_supabase():
     try:
         from supabase import create_client
@@ -546,7 +580,7 @@ with tab_matchups:
     stat_c2.metric("Your Predictions", f"{my_votes_count} / {total_stocks}")
     stat_c3.metric("Active League Members", len(data["users"]))
     
-    st.caption("🏁 **Official Rule:** Result is based on **Friday Market Close Price** vs. Pre-Earnings Price. &nbsp; 🟢 **UP** (> +0.5%) &nbsp;|&nbsp; ⚪ **NEUTRAL** (±0.5%) &nbsp;|&nbsp; 🔴 **DOWN** (< -0.5%)")
+    st.caption("🏁 **Official Rule:** Votes lock **1 hour before earnings report** (3:00 PM ET for AMC / 8:00 AM ET for BMO). Picks cannot be changed once submitted. Winners decided by **Friday Market Close Price** vs Pre-Earnings Price. &nbsp; 🟢 **UP** (> +0.5%) &nbsp;|&nbsp; ⚪ **NEUTRAL** (±0.5%) &nbsp;|&nbsp; 🔴 **DOWN** (< -0.5%)")
     st.divider()
     
     if not stocks:
@@ -585,6 +619,21 @@ with tab_matchups:
             else:
                 my_vote_label = ""
 
+            # Lock check: Cannot vote after earnings, or change vote if locked
+            is_locked, lock_reason = is_stock_locked(stock)
+            has_already_voted = my_vote is not None
+            
+            # Can vote only if authenticated, user picked, earnings not passed, and not already voted
+            can_vote = st.session_state.authenticated and bool(active_user_id) and not is_locked and not has_already_voted
+
+            # Status badge for card
+            if is_locked:
+                status_badge = f"<span style='color:#f87171; font-weight:700;'>🔒 {lock_reason}</span>"
+            elif has_already_voted:
+                status_badge = "<span style='color:#38bdf8; font-weight:700;'>🔒 Pick Locked In</span>"
+            else:
+                status_badge = "<span style='color:#4ade80; font-weight:600;'>🟢 Voting Open</span>"
+
             st.markdown(f"""
 <div style="
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -601,7 +650,8 @@ with tab_matchups:
         </div>
         <div style="text-align:right;">
             <span style="font-size:0.8rem; color:#38bdf8; font-weight:600;">{stock.get('date','TBD')}</span><br>
-            <span style="font-size:0.75rem; color:#94a3b8;">{t_badge}</span>
+            <span style="font-size:0.75rem; color:#94a3b8;">{t_badge}</span><br>
+            <span style="font-size:0.75rem;">{status_badge}</span>
         </div>
     </div>
     <div style="display:flex; gap:20px; margin-top:10px; flex-wrap:wrap;">
@@ -614,8 +664,7 @@ with tab_matchups:
 </div>
 """, unsafe_allow_html=True)
 
-            # Vote buttons — full width, easy to tap on mobile
-            can_vote = st.session_state.authenticated and bool(active_user_id)
+            # Vote buttons — full width, disabled if locked or already voted
             b1, b2, b3 = st.columns(3)
             with b1:
                 btn_up_type = "primary" if my_vote == "UP" else "secondary"
@@ -637,6 +686,7 @@ with tab_matchups:
                     st.rerun()
 
             st.markdown("<div style='margin-bottom:6px'></div>", unsafe_allow_html=True)
+
 
 
 # Tab 2: Leaderboard
