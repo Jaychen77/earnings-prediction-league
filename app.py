@@ -228,19 +228,6 @@ DEFAULT_DATA = {
             "date_range": "Aug 31 - Sep 04, 2026",
             "stocks": [
                 {
-                    "id": "s-w35-1",
-                    "ticker": "AVGO",
-                    "company": "Broadcom Inc.",
-                    "date": "Sep 03 (Thu)",
-                    "timing": "AMC (After Close)",
-                    "price": 160.50,
-                    "eps_est": 1.20,
-                    "market_cap_b": 750.2,
-                    "actual_dir": None,
-                    "actual_pct": None,
-                    "votes": {}
-                },
-                {
                     "id": "s-w35-2",
                     "ticker": "LULU",
                     "company": "Lululemon Athletica",
@@ -322,13 +309,18 @@ DATA_FILE = os.path.join(os.path.dirname(__file__), f"league_data_{SCHEMA_VERSIO
 SUPABASE_TABLE = "earningsbeat_state"
 
 def _merge_defaults(saved):
-    """Merge any missing default stocks/weeks into saved data."""
+    """Merge default weeks into saved data and prune explicitly removed tickers."""
+    # List of removed tickers
+    removed_tickers = {"AVGO"}
+    for w in saved.get("weeks", []):
+        w["stocks"] = [s for s in w.get("stocks", []) if s.get("ticker") not in removed_tickers]
+
     for def_week in DEFAULT_DATA["weeks"]:
         saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
         if saved_week:
             existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
             for s in def_week.get("stocks", []):
-                if s["ticker"] not in existing_tickers:
+                if s["ticker"] not in existing_tickers and s["ticker"] not in removed_tickers:
                     saved_week["stocks"].append(s)
         else:
             saved.setdefault("weeks", []).append(def_week)
