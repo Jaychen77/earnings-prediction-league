@@ -120,7 +120,7 @@ DEFAULT_DATA = {
                     "id": "s-1",
                     "ticker": "INTU",
                     "company": "Intuit Inc.",
-                    "date": "Aug 22 / Aug 25",
+                    "date": "Aug 25 (Tue)",
                     "timing": "AMC (After Close)",
                     "price": 665.00,
                     "eps_est": 1.85,
@@ -310,10 +310,13 @@ SUPABASE_TABLE = "earningsbeat_state"
 
 def _merge_defaults(saved):
     """Merge default weeks into saved data and prune explicitly removed tickers."""
-    # List of removed tickers
     removed_tickers = {"AVGO"}
     for w in saved.get("weeks", []):
         w["stocks"] = [s for s in w.get("stocks", []) if s.get("ticker") not in removed_tickers]
+        # Ensure INTU date is cleanly Aug 25 (Tue)
+        for s in w.get("stocks", []):
+            if s.get("ticker") == "INTU" and "/" in s.get("date", ""):
+                s["date"] = "Aug 25 (Tue)"
 
     for def_week in DEFAULT_DATA["weeks"]:
         saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
@@ -341,9 +344,10 @@ def is_stock_locked(stock):
         for m_name, m_num in months.items():
             if m_name in d_str.lower():
                 import re
-                day_match = re.search(r'\b(\d{1,2})\b', d_str)
-                if day_match:
-                    day = int(day_match.group(1))
+                # Find all numbers and use the last day number (e.g. if 'Aug 22 / Aug 25', pick 25)
+                day_matches = re.findall(r'\b(\d{1,2})\b', d_str)
+                if day_matches:
+                    day = int(day_matches[-1])
                     year = now.year
                     
                     # 1 hour before earnings:
