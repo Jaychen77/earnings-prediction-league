@@ -62,55 +62,12 @@ DEFAULT_DATA = {
     ],
     "weeks": [
         {
-            "id": "week-2026-33",
-            "name": "Week 33 (Aug 17 - Aug 21, 2026)",
-            "date_range": "Aug 17 - Aug 21, 2026",
-            "stocks": [
-                {
-                    "id": "s-1",
-                    "ticker": "CSCO",
-                    "company": "Cisco Systems",
-                    "date": "2026-08-19",
-                    "timing": "AMC",
-                    "price": 49.50,
-                    "eps_est": 0.85,
-                    "actual_dir": "UP",
-                    "actual_pct": 7.2,
-                    "votes": {"user-1": "UP", "user-2": "UP", "user-3": "DOWN"}
-                },
-                {
-                    "id": "s-2",
-                    "ticker": "WMT",
-                    "company": "Walmart Inc.",
-                    "date": "2026-08-20",
-                    "timing": "BMO",
-                    "price": 68.20,
-                    "eps_est": 0.65,
-                    "actual_dir": "UP",
-                    "actual_pct": 6.5,
-                    "votes": {"user-1": "UP", "user-2": "DOWN", "user-3": "UP"}
-                },
-                {
-                    "id": "s-3",
-                    "ticker": "TGT",
-                    "company": "Target Corp",
-                    "date": "2026-08-21",
-                    "timing": "BMO",
-                    "price": 135.00,
-                    "eps_est": 2.18,
-                    "actual_dir": "UP",
-                    "actual_pct": 11.2,
-                    "votes": {"user-1": "DOWN", "user-2": "DOWN", "user-3": "UP"}
-                }
-            ]
-        },
-        {
             "id": "week-2026-34",
             "name": "Week 34 (Aug 24 - Aug 28, 2026)",
             "date_range": "Aug 24 - Aug 28, 2026",
             "stocks": [
                 {
-                    "id": "s-4",
+                    "id": "s-1",
                     "ticker": "NVDA",
                     "company": "NVIDIA Corp",
                     "date": "2026-08-26",
@@ -119,10 +76,10 @@ DEFAULT_DATA = {
                     "eps_est": 0.68,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-1": "UP", "user-2": "UP", "user-3": "DOWN"}
+                    "votes": {}
                 },
                 {
-                    "id": "s-5",
+                    "id": "s-2",
                     "ticker": "CRWD",
                     "company": "CrowdStrike",
                     "date": "2026-08-27",
@@ -131,10 +88,10 @@ DEFAULT_DATA = {
                     "eps_est": 0.98,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-1": "DOWN", "user-2": "DOWN", "user-3": "UP"}
+                    "votes": {}
                 },
                 {
-                    "id": "s-6",
+                    "id": "s-3",
                     "ticker": "SNOW",
                     "company": "Snowflake Inc",
                     "date": "2026-08-26",
@@ -143,10 +100,10 @@ DEFAULT_DATA = {
                     "eps_est": 0.16,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-2": "UP", "user-3": "UP"}
+                    "votes": {}
                 },
                 {
-                    "id": "s-7",
+                    "id": "s-4",
                     "ticker": "DELL",
                     "company": "Dell Technologies",
                     "date": "2026-08-28",
@@ -155,7 +112,7 @@ DEFAULT_DATA = {
                     "eps_est": 1.73,
                     "actual_dir": None,
                     "actual_pct": None,
-                    "votes": {"user-1": "UP", "user-3": "UP"}
+                    "votes": {}
                 }
             ]
         }
