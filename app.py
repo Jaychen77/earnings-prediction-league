@@ -177,6 +177,8 @@ DEFAULT_DATA = {
 SCHEMA_VERSION = "v3"
 DATA_FILE = os.path.join(os.path.dirname(__file__), f"league_data_{SCHEMA_VERSION}.json")
 
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1RvnYDs3lRK1j50l8K3_LV2fbrJhQgXmBJnSN3UNEXtM/edit?gid=0#gid=0"
+
 # Google Sheets Permanent Connection Helper
 def get_gsheets_connection():
     try:
