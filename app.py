@@ -458,7 +458,7 @@ if "active_user_id" not in st.session_state:
 h_col1, h_col2, h_col3 = st.columns([2.2, 2.0, 1.8])
 with h_col1:
     st.markdown("## 📈 Earnings**Beat**")
-    st.caption("Predict stock price direction after earnings • >$50B Cap")
+    st.caption("Predict stock price direction by Friday close • Mega-caps (>$50B)")
 
 with h_col2:
     user_labels = ["— Select who you are —"] + [f"{u['avatar']} {u['name']}" for u in data["users"]]
@@ -546,7 +546,7 @@ with tab_matchups:
     stat_c2.metric("Your Predictions", f"{my_votes_count} / {total_stocks}")
     stat_c3.metric("Active League Members", len(data["users"]))
     
-    st.caption("🟢 **UP** = stock price goes UP after earnings report &nbsp;|&nbsp; 🔴 **DOWN** = price drops &nbsp;|&nbsp; ⚪ **NEUTRAL** = roughly flat")
+    st.caption("🏁 **Official Rule:** Result is based on **Friday Market Close Price** vs. Pre-Earnings Price. &nbsp; 🟢 **UP** (> +0.5%) &nbsp;|&nbsp; ⚪ **NEUTRAL** (±0.5%) &nbsp;|&nbsp; 🔴 **DOWN** (< -0.5%)")
     st.divider()
     
     if not stocks:
@@ -678,3 +678,5 @@ with tab_leaderboard:
     df_lb = pd.DataFrame(leaderboard_list).drop(columns=["_points_num", "_win_rate_num"])
     df_lb.index = range(1, len(df_lb) + 1)
     st.dataframe(df_lb, use_container_width=True)
+    
+    st.caption("ℹ️ **Scoring Rule:** 1 Win (+10 pts) per correct call evaluated at **Friday 4:00 PM ET close**. Stocks you did not pick do not count as losses.")
