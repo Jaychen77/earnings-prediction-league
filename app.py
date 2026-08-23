@@ -360,6 +360,22 @@ with tab_matchups:
     if not stocks:
         st.info("No stock earnings matchups added for this week yet.")
     else:
+        # Table Header
+        h_ticker, h_date, h_price, h_cons, h_pick = st.columns([1.8, 1.4, 1.4, 2.8, 2.6])
+        with h_ticker:
+            st.markdown("**Ticker & Company**")
+        with h_date:
+            st.markdown("**Date & Time**")
+        with h_price:
+            st.markdown("**Price & Est.**")
+        with h_cons:
+            st.markdown("**Consensus & Votes**")
+        with h_pick:
+            st.markdown("**Your Pick (PIN Unlocked)**" if st.session_state.authenticated else "**Your Pick**")
+        
+        st.divider()
+        
+        # Table Rows
         for stock in stocks:
             votes = stock.get("votes", {})
             my_vote = votes.get(active_user_id)
@@ -373,72 +389,69 @@ with tab_matchups:
             down_pct = int((down_votes / total_votes * 100)) if total_votes > 0 else 33
             neutral_pct = 100 - up_pct - down_pct if total_votes > 0 else 34
             
-            with st.container():
-                c_info, c_consensus, c_action = st.columns([2.5, 2.5, 2.5])
+            row_c1, row_c2, row_c3, row_c4, row_c5 = st.columns([1.8, 1.4, 1.4, 2.8, 2.6])
+            
+            with row_c1:
+                cap_str = f" • ${stock['market_cap_b']}B" if stock.get("market_cap_b") else ""
+                st.markdown(f"**{stock['ticker']}** <span style='font-size:0.75rem; color:#94a3b8;'>{cap_str}</span>", unsafe_allow_html=True)
+                st.caption(f"{stock.get('company', stock['ticker'])[:20]}")
+            
+            with row_c2:
+                st.write(f"**{stock.get('date', 'TBD')}**")
+                t_badge = "AMC" if "AMC" in stock.get('timing', 'AMC') else "BMO"
+                st.caption(f"`{t_badge}`")
                 
-                with c_info:
-                    timing_str = f"({stock.get('timing', 'AMC')})"
-                    cap_badge = f" • 🏛️ Cap: ${stock['market_cap_b']}B" if stock.get("market_cap_b") else ""
-                    st.markdown(f"### **{stock['ticker']}** `{timing_str}`")
-                    st.caption(f"{stock.get('company', stock['ticker'])}{cap_badge} • Report Date: {stock.get('date', 'TBD')}")
-                    p_str = f"${stock.get('price'):.2f}" if stock.get("price") else "N/A"
-                    eps_str = f"${stock.get('eps_est'):.2f}" if stock.get("eps_est") else "N/A"
-                    st.write(f"💵 **Price:** {p_str} | 📊 **Est. EPS:** {eps_str}")
+            with row_c3:
+                p_str = f"${stock.get('price'):.2f}" if stock.get("price") else "N/A"
+                eps_str = f"${stock.get('eps_est'):.2f}" if stock.get("eps_est") else "N/A"
+                st.write(f"**{p_str}**")
+                st.caption(f"EPS: {eps_str}")
+            
+            with row_c4:
+                st.progress(up_pct / 100)
+                st.caption(f"🟢 {up_votes} | ⚪ {neutral_votes} | 🔴 {down_votes}")
+                chips = []
+                for u in data["users"]:
+                    if u["id"] in votes:
+                        v = votes[u["id"]]
+                        v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else "⚪")
+                        chips.append(f"{u['avatar']} {u['name'].split()[0]} {v_icon}")
+                if chips:
+                    st.caption(" ".join(chips))
+            
+            with row_c5:
+                if not st.session_state.authenticated:
+                    with st.popover("🔒 Unlock PIN"):
+                        st.caption("Enter PIN to vote:")
+                        pin_try = st.text_input("PIN", type="password", key=f"pin_{stock['id']}", autocomplete="new-password")
+                        if st.button("Unlock", key=f"btn_unlock_{stock['id']}", use_container_width=True):
+                            if pin_try.strip() == VOTE_PASSWORD:
+                                st.session_state.authenticated = True
+                                st.rerun()
+                            else:
+                                st.error("Wrong PIN")
                 
-                with c_consensus:
-                    st.write("**Group Consensus**")
-                    st.progress(up_pct / 100)
-                    st.caption(f"🟢 {up_pct}% UP ({up_votes}) | ⚪ {neutral_pct}% NEUTRAL ({neutral_votes}) | 🔴 {down_pct}% DOWN ({down_votes})")
-                    
-                    chips = []
-                    for u in data["users"]:
-                        if u["id"] in votes:
-                            v = votes[u["id"]]
-                            v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else "⚪")
-                            chips.append(f"{u['avatar']} {u['name']} {v_icon}")
-                    if chips:
-                        st.write(" ".join(chips))
-                    else:
-                        st.caption("No votes submitted yet")
-                
-                with c_action:
-                    st.write("**Cast Your Prediction**")
-                    if not st.session_state.authenticated:
-                        with st.popover("🔒 Unlock Voting (PIN)"):
-                            st.caption("Enter league PIN to unlock predictions:")
-                            pin_try = st.text_input("League PIN", type="password", key=f"pin_{stock['id']}", autocomplete="new-password", placeholder="Enter 9-digit PIN...")
-                            if st.button("Unlock Voting", key=f"btn_unlock_{stock['id']}", use_container_width=True):
-                                if pin_try.strip() == VOTE_PASSWORD:
-                                    st.session_state.authenticated = True
-                                    st.success("Unlocked! Cast your votes below.")
-                                    st.rerun()
-                                else:
-                                    st.error("Incorrect PIN")
-                    
-                    b_col1, b_col2, b_col3 = st.columns(3)
-                    
-                    with b_col1:
-                        btn_up_type = "primary" if my_vote == "UP" else "secondary"
-                        if st.button(f"🟢 UP", key=f"btn_up_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_up_type, use_container_width=True):
-                            stock.setdefault("votes", {})[active_user_id] = "UP"
-                            save_data(data)
-                            st.rerun()
-                            
-                    with b_col2:
-                        btn_neu_type = "primary" if my_vote == "NEUTRAL" else "secondary"
-                        if st.button(f"⚪ NEU", key=f"btn_neu_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_neu_type, use_container_width=True):
-                            stock.setdefault("votes", {})[active_user_id] = "NEUTRAL"
-                            save_data(data)
-                            st.rerun()
-
-                    with b_col3:
-                        btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
-                        if st.button(f"🔴 DOWN", key=f"btn_down_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_down_type, use_container_width=True):
-                            stock.setdefault("votes", {})[active_user_id] = "DOWN"
-                            save_data(data)
-                            st.rerun()
-                
-                st.divider()
+                b1, b2, b3 = st.columns(3)
+                with b1:
+                    btn_up_type = "primary" if my_vote == "UP" else "secondary"
+                    if st.button("🟢", key=f"btn_up_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_up_type, use_container_width=True):
+                        stock.setdefault("votes", {})[active_user_id] = "UP"
+                        save_data(data)
+                        st.rerun()
+                with b2:
+                    btn_neu_type = "primary" if my_vote == "NEUTRAL" else "secondary"
+                    if st.button("⚪", key=f"btn_neu_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_neu_type, use_container_width=True):
+                        stock.setdefault("votes", {})[active_user_id] = "NEUTRAL"
+                        save_data(data)
+                        st.rerun()
+                with b3:
+                    btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
+                    if st.button("🔴", key=f"btn_down_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_down_type, use_container_width=True):
+                        stock.setdefault("votes", {})[active_user_id] = "DOWN"
+                        save_data(data)
+                        st.rerun()
+            
+            st.divider()
 
 # Tab 2: Leaderboard
 with tab_leaderboard:
