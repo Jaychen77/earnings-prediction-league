@@ -189,12 +189,16 @@ def fetch_live_stock_data(ticker_list):
             info = t_obj.info or {}
             p = info.get("currentPrice") or info.get("previousClose") or info.get("regularMarketPrice")
             eps = info.get("forwardEps") or info.get("trailingEps")
+            mkt_cap = info.get("marketCap", 0) or 0
             results[ticker] = {
+                "name": info.get("shortName") or info.get("longName") or ticker,
                 "price": float(p) if p else None,
-                "eps_est": float(eps) if eps else None
+                "eps_est": float(eps) if eps else None,
+                "market_cap": float(mkt_cap),
+                "market_cap_b": round(mkt_cap / 1e9, 1) if mkt_cap else 0
             }
         except Exception:
-            results[ticker] = {"price": None, "eps_est": None}
+            results[ticker] = {"name": ticker, "price": None, "eps_est": None, "market_cap": 0, "market_cap_b": 0}
     return results
 
 def sync_daily_stock_data(data):
@@ -212,6 +216,8 @@ def sync_daily_stock_data(data):
                 if t_data.get("eps_est") and s.get("eps_est") != t_data["eps_est"]:
                     s["eps_est"] = t_data["eps_est"]
                     updated = True
+                if t_data.get("market_cap_b"):
+                    s["market_cap_b"] = t_data["market_cap_b"]
         if updated:
             save_data(data)
 
@@ -225,33 +231,79 @@ data = st.session_state.data
 h_col1, h_col2 = st.columns([3, 2])
 with h_col1:
     st.markdown("## 📈 Earnings**Beat**")
-    st.caption("Weekly Stock Up/Down Prediction League")
+    st.caption("Weekly Stock Up/Down Prediction League • Mega & Large Caps (>$50B Market Cap)")
 
 with h_col2:
     user_options = {f"{u['avatar']} {u['name']}": u['id'] for u in data["users"]}
     selected_user_label = st.selectbox("🎯 Voting As:", list(user_options.keys()), index=0)
     active_user_id = user_options[selected_user_label]
 
-# Only You Can Add Users
-with st.expander("👤 Add New Friend to League (Commissioner)", expanded=False):
-    with st.form("add_user_form", clear_on_submit=True):
-        u_col1, u_col2 = st.columns([2, 1])
-        with u_col1:
-            new_friend_name = st.text_input("Friend's Display Name")
-        with u_col2:
-            new_friend_avatar = st.selectbox("Avatar Icon", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄", "🦅", "🦈"])
-        
-        if st.form_submit_button("➕ Add to League"):
-            if new_friend_name.strip():
-                new_user = {
-                    "id": f"user-{int(datetime.now().timestamp()*1000)}",
-                    "name": new_friend_name.strip(),
-                    "avatar": new_friend_avatar
-                }
-                data["users"].append(new_user)
-                save_data(data)
-                st.success(f"Added {new_friend_name} to the league!")
-                st.rerun()
+# Commissioner Control: Add User & Add Stock (> $50B Market Cap)
+c_bar1, c_bar2 = st.columns(2)
+with c_bar1:
+    with st.expander("👤 Add Member to League", expanded=False):
+        with st.form("add_user_form", clear_on_submit=True):
+            u_col1, u_col2 = st.columns([2, 1])
+            with u_col1:
+                new_friend_name = st.text_input("Friend's Display Name")
+            with u_col2:
+                new_friend_avatar = st.selectbox("Avatar Icon", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄", "🦅", "🦈"])
+            
+            if st.form_submit_button("➕ Add to League"):
+                if new_friend_name.strip():
+                    new_user = {
+                        "id": f"user-{int(datetime.now().timestamp()*1000)}",
+                        "name": new_friend_name.strip(),
+                        "avatar": new_friend_avatar
+                    }
+                    data["users"].append(new_user)
+                    save_data(data)
+                    st.success(f"Added {new_friend_name} to the league!")
+                    st.rerun()
+
+with c_bar2:
+    with st.expander("🔍 Add Stock Matchup (> $50B Cap)", expanded=False):
+        with st.form("add_stock_cap_form", clear_on_submit=True):
+            t_input = st.text_input("Ticker Symbol (e.g. AMD, BABA, AVGO, COST)").upper().strip()
+            timing_input = st.selectbox("Earnings Timing", ["AMC (After Close)", "BMO (Before Open)"])
+            
+            if st.form_submit_button("➕ Check & Add (> $50B)"):
+                if t_input:
+                    try:
+                        ticker_info = yf.Ticker(t_input).info or {}
+                        mkt_cap = ticker_info.get("marketCap", 0) or 0
+                        mkt_cap_b = round(mkt_cap / 1e9, 1)
+                        
+                        if mkt_cap_b >= 50.0:
+                            comp_name = ticker_info.get("shortName") or ticker_info.get("longName") or t_input
+                            cur_price = ticker_info.get("currentPrice") or ticker_info.get("previousClose") or ticker_info.get("regularMarketPrice") or 0.0
+                            eps = ticker_info.get("forwardEps") or ticker_info.get("trailingEps") or None
+                            
+                            # Add to active week
+                            active_week = data["weeks"][0]
+                            if not any(s["ticker"] == t_input for s in active_week.get("stocks", [])):
+                                active_week.setdefault("stocks", []).append({
+                                    "id": f"stock-{int(datetime.now().timestamp()*1000)}",
+                                    "ticker": t_input,
+                                    "company": comp_name,
+                                    "timing": timing_input,
+                                    "date": "Next Week",
+                                    "price": float(cur_price) if cur_price else None,
+                                    "eps_est": float(eps) if eps else None,
+                                    "market_cap_b": mkt_cap_b,
+                                    "actual_dir": None,
+                                    "actual_pct": None,
+                                    "votes": {}
+                                })
+                                save_data(data)
+                                st.success(f"✅ Added {t_input} ({comp_name}) — Market Cap: ${mkt_cap_b}B (Over $50B)!")
+                                st.rerun()
+                            else:
+                                st.info(f"{t_input} is already in the lineup.")
+                        else:
+                            st.error(f"❌ {t_input} Market Cap is ${mkt_cap_b}B. Only stocks > $50B qualify!")
+                    except Exception as e:
+                        st.error(f"Error fetching ticker {t_input}: {e}")
 
 st.divider()
 
@@ -295,8 +347,9 @@ with tab_matchups:
                 
                 with c_info:
                     timing_str = f"({stock.get('timing', 'AMC')})"
+                    cap_badge = f" • 🏛️ Cap: ${stock['market_cap_b']}B" if stock.get("market_cap_b") else ""
                     st.markdown(f"### **{stock['ticker']}** `{timing_str}`")
-                    st.caption(f"{stock.get('company', stock['ticker'])} • Report Date: {stock.get('date', 'TBD')}")
+                    st.caption(f"{stock.get('company', stock['ticker'])}{cap_badge} • Report Date: {stock.get('date', 'TBD')}")
                     p_str = f"${stock.get('price'):.2f}" if stock.get("price") else "N/A"
                     eps_str = f"${stock.get('eps_est'):.2f}" if stock.get("eps_est") else "N/A"
                     st.write(f"💵 **Price:** {p_str} | 📊 **Est. EPS:** {eps_str}")
