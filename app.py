@@ -68,6 +68,30 @@ DEFAULT_DATA = {
             "stocks": [
                 {
                     "id": "s-1",
+                    "ticker": "INTU",
+                    "company": "Intuit Inc.",
+                    "date": "Aug 22 / Aug 25",
+                    "timing": "AMC (After Close)",
+                    "price": 665.00,
+                    "eps_est": 1.85,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-2",
+                    "ticker": "SNPS",
+                    "company": "Synopsys, Inc.",
+                    "date": "Aug 26 (Wed)",
+                    "timing": "AMC (After Close)",
+                    "price": 575.00,
+                    "eps_est": 3.28,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-3",
                     "ticker": "NVDA",
                     "company": "NVIDIA Corporation",
                     "date": "Aug 26 (Wed)",
@@ -79,7 +103,7 @@ DEFAULT_DATA = {
                     "votes": {}
                 },
                 {
-                    "id": "s-2",
+                    "id": "s-4",
                     "ticker": "CRWD",
                     "company": "CrowdStrike Holdings",
                     "date": "Aug 27 (Thu)",
@@ -91,7 +115,7 @@ DEFAULT_DATA = {
                     "votes": {}
                 },
                 {
-                    "id": "s-3",
+                    "id": "s-5",
                     "ticker": "SNOW",
                     "company": "Snowflake Inc",
                     "date": "Aug 27 (Thu)",
@@ -103,10 +127,22 @@ DEFAULT_DATA = {
                     "votes": {}
                 },
                 {
-                    "id": "s-4",
+                    "id": "s-6",
+                    "ticker": "CRM",
+                    "company": "Salesforce, Inc.",
+                    "date": "Aug 28 (Wed/Thu)",
+                    "timing": "AMC (After Close)",
+                    "price": 260.00,
+                    "eps_est": 2.35,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-7",
                     "ticker": "DELL",
                     "company": "Dell Technologies",
-                    "date": "Aug 28 (Fri)",
+                    "date": "Aug 28 (Thu/Fri)",
                     "timing": "AMC (After Close)",
                     "price": 139.10,
                     "eps_est": 1.73,
@@ -115,7 +151,7 @@ DEFAULT_DATA = {
                     "votes": {}
                 },
                 {
-                    "id": "s-5",
+                    "id": "s-8",
                     "ticker": "PDD",
                     "company": "PDD Holdings (Temu)",
                     "date": "Aug 28 (Fri)",
