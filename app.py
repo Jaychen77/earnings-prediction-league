@@ -302,64 +302,152 @@ with tab_leaderboard:
     df_lb.index = range(1, len(df_lb) + 1)
     st.dataframe(df_lb, use_container_width=True)
 
-# Tab 3: Admin Management (Add Stock / Resolve Outcomes)
+# Tab 3: Admin Management (Add Stock / Resolve Outcomes / New Weeks)
 with tab_admin:
-    st.subheader("⚙️ Add Matchups & Record Actual Outcomes")
+    st.subheader("👑 Commissioner & League Admin")
+    st.caption("Only you (Commissioner) can create new weekly rounds, add earnings slates, or resolve outcomes.")
     
-    c_add, c_res = st.columns(2)
+    admin_pin = st.text_input("🔑 Commissioner PIN", type="password", help="Default PIN: 1234")
     
-    with c_add:
-        st.markdown("### ➕ Add Stock Matchup")
-        with st.form("add_stock_form", clear_on_submit=True):
-            target_week_name = st.selectbox("Target Week", [w["name"] for w in data["weeks"]])
-            ticker = st.text_input("Ticker Symbol (e.g. AAPL, AMZN)").upper().strip()
-            company = st.text_input("Company Name (e.g. Apple Inc.)")
-            timing = st.selectbox("Timing", ["AMC (After Close)", "BMO (Before Open)", "During Market"])
-            report_date = st.date_input("Report Date", datetime.now()).strftime("%Y-%m-%d")
-            price = st.number_input("Prior Close Price ($)", min_value=0.0, step=0.5)
-            eps_est = st.number_input("Consensus EPS Estimate ($)", min_value=-50.0, max_value=100.0, step=0.05)
-            
-            if st.form_submit_button("Add to Weekly Slate"):
-                if ticker and company:
-                    target_week = next(w for w in data["weeks"] if w["name"] == target_week_name)
-                    new_stock = {
-                        "id": f"stock-{int(datetime.now().timestamp()*1000)}",
-                        "ticker": ticker,
-                        "company": company,
-                        "timing": timing.split()[0],
-                        "date": report_date,
-                        "price": price if price > 0 else None,
-                        "eps_est": eps_est if eps_est != 0 else None,
-                        "actual_dir": None,
-                        "actual_pct": None,
-                        "votes": {}
-                    }
-                    target_week.setdefault("stocks", []).append(new_stock)
-                    save_data(data)
-                    st.success(f"Added {ticker} to {target_week_name}!")
-                    st.rerun()
-    
-    with c_res:
-        st.markdown("### ⚖️ Resolve Earnings Outcome")
-        unresolved_stocks = []
-        for w in data["weeks"]:
-            for s in w.get("stocks", []):
-                unresolved_stocks.append((f"{s['ticker']} ({w['name'].split()[0]})", s))
+    if admin_pin == "1234":
+        st.success("✅ Commissioner Access Granted")
         
-        if unresolved_stocks:
-            stock_labels = [label for label, s in unresolved_stocks]
-            chosen_label = st.selectbox("Select Matchup to Resolve:", stock_labels)
-            chosen_stock = next(s for label, s in unresolved_stocks if label == chosen_label)
+        col_w, col_s = st.columns(2)
+        
+        with col_w:
+            with st.expander("📅 Create New Weekly Round", expanded=False):
+                with st.form("create_week_form", clear_on_submit=True):
+                    w_num = st.number_input("Week Number", min_value=1, max_value=53, value=35)
+                    w_start = st.date_input("Start Date")
+                    w_end = st.date_input("End Date")
+                    
+                    if st.form_submit_button("➕ Create Week Round"):
+                        w_name = f"Week {w_num} ({w_start.strftime('%b %d')} - {w_end.strftime('%b %d, %Y')})"
+                        new_week = {
+                            "id": f"week-2026-{w_num}",
+                            "name": w_name,
+                            "date_range": f"{w_start.strftime('%b %d')} - {w_end.strftime('%b %d, %Y')}",
+                            "stocks": []
+                        }
+                        data["weeks"].insert(0, new_week)
+                        save_data(data)
+                        st.success(f"Created {w_name}!")
+                        st.rerun()
+
+        with col_s:
+            with st.expander("👥 Add New Friend / Member", expanded=False):
+                with st.form("add_friend_admin_form", clear_on_submit=True):
+                    f_name = st.text_input("Friend's Name")
+                    f_avatar = st.selectbox("Avatar", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄"])
+                    
+                    if st.form_submit_button("➕ Add Friend"):
+                        if f_name:
+                            new_u = {
+                                "id": f"user-{int(datetime.now().timestamp()*1000)}",
+                                "name": f_name.strip(),
+                                "avatar": f_avatar
+                            }
+                            data["users"].append(new_u)
+                            save_data(data)
+                            st.success(f"Added {f_name} to league!")
+                            st.rerun()
+
+        st.divider()
+
+        c_add, c_res = st.columns(2)
+        
+        with c_add:
+            st.markdown("### ➕ Add Stock Matchup")
             
-            with st.form("resolve_form"):
-                actual_dir = st.radio("Actual Price Reaction:", ["UP (Beat / Rallied)", "DOWN (Miss / Dropped)"])
-                pct_move = st.number_input("Actual % Move (e.g. +6.5 or -4.2):", step=0.1)
+            # Quick Add presets
+            st.caption("Quick Add Trending Tickers:")
+            presets = [
+                ("AAPL", "Apple Inc.", "AMC", 225.0, 1.45),
+                ("TSLA", "Tesla Inc.", "AMC", 215.0, 0.62),
+                ("AMZN", "Amazon.com", "AMC", 185.0, 1.15),
+                ("GOOGL", "Alphabet Inc.", "AMC", 168.0, 1.85),
+                ("META", "Meta Platforms", "AMC", 515.0, 5.25),
+                ("AMD", "Advanced Micro Devices", "AMC", 155.0, 0.70),
+                ("NFLX", "Netflix Inc.", "AMC", 670.0, 5.10),
+                ("PLTR", "Palantir Technologies", "AMC", 32.0, 0.09)
+            ]
+            
+            p_cols = st.columns(4)
+            for i, (t_sym, t_comp, t_time, t_p, t_eps) in enumerate(presets):
+                with p_cols[i % 4]:
+                    if st.button(f"+ {t_sym}", key=f"quick_{t_sym}", use_container_width=True):
+                        target_week = current_week
+                        if not any(s["ticker"] == t_sym for s in target_week.get("stocks", [])):
+                            target_week.setdefault("stocks", []).append({
+                                "id": f"stock-{int(datetime.now().timestamp()*1000)}",
+                                "ticker": t_sym,
+                                "company": t_comp,
+                                "timing": t_time,
+                                "date": datetime.now().strftime("%Y-%m-%d"),
+                                "price": t_p,
+                                "eps_est": t_eps,
+                                "actual_dir": None,
+                                "actual_pct": None,
+                                "votes": {}
+                            })
+                            save_data(data)
+                            st.success(f"Added {t_sym} to {target_week['name']}!")
+                            st.rerun()
+
+            with st.form("add_stock_form", clear_on_submit=True):
+                target_week_name = st.selectbox("Target Week", [w["name"] for w in data["weeks"]])
+                ticker = st.text_input("Custom Ticker Symbol (e.g. MSFT, COIN)").upper().strip()
+                company = st.text_input("Company Name")
+                timing = st.selectbox("Timing", ["AMC (After Close)", "BMO (Before Open)", "During Market"])
+                report_date = st.date_input("Report Date", datetime.now()).strftime("%Y-%m-%d")
+                price = st.number_input("Prior Close Price ($)", min_value=0.0, step=0.5)
+                eps_est = st.number_input("Consensus EPS Estimate ($)", min_value=-50.0, max_value=100.0, step=0.05)
                 
-                if st.form_submit_button("Confirm & Tally Points"):
-                    chosen_stock["actual_dir"] = "UP" if "UP" in actual_dir else "DOWN"
-                    chosen_stock["actual_pct"] = pct_move
-                    save_data(data)
-                    st.success(f"Outcome saved for {chosen_stock['ticker']}!")
-                    st.rerun()
-        else:
-            st.info("No pending matchups found.")
+                if st.form_submit_button("Add Custom Stock to Slate"):
+                    if ticker:
+                        target_week = next(w for w in data["weeks"] if w["name"] == target_week_name)
+                        new_stock = {
+                            "id": f"stock-{int(datetime.now().timestamp()*1000)}",
+                            "ticker": ticker,
+                            "company": company or ticker,
+                            "timing": timing.split()[0],
+                            "date": report_date,
+                            "price": price if price > 0 else None,
+                            "eps_est": eps_est if eps_est != 0 else None,
+                            "actual_dir": None,
+                            "actual_pct": None,
+                            "votes": {}
+                        }
+                        target_week.setdefault("stocks", []).append(new_stock)
+                        save_data(data)
+                        st.success(f"Added {ticker} to {target_week_name}!")
+                        st.rerun()
+        
+        with c_res:
+            st.markdown("### ⚖️ Resolve Earnings Outcome")
+            unresolved_stocks = []
+            for w in data["weeks"]:
+                for s in w.get("stocks", []):
+                    status_tag = " [Resolved]" if s.get("actual_dir") else ""
+                    unresolved_stocks.append((f"{s['ticker']} ({w['name'].split()[0]}){status_tag}", s))
+            
+            if unresolved_stocks:
+                stock_labels = [label for label, s in unresolved_stocks]
+                chosen_label = st.selectbox("Select Matchup to Resolve / Edit:", stock_labels)
+                chosen_stock = next(s for label, s in unresolved_stocks if label == chosen_label)
+                
+                with st.form("resolve_form"):
+                    curr_dir_idx = 0 if chosen_stock.get("actual_dir") == "UP" else (1 if chosen_stock.get("actual_dir") == "DOWN" else 0)
+                    actual_dir = st.radio("Actual Price Reaction:", ["UP (Beat / Rallied)", "DOWN (Miss / Dropped)"], index=curr_dir_idx)
+                    pct_move = st.number_input("Actual % Move (e.g. +6.5 or -4.2):", value=float(chosen_stock.get("actual_pct") or 0.0), step=0.1)
+                    
+                    if st.form_submit_button("Confirm & Tally Points"):
+                        chosen_stock["actual_dir"] = "UP" if "UP" in actual_dir else "DOWN"
+                        chosen_stock["actual_pct"] = pct_move
+                        save_data(data)
+                        st.success(f"Outcome saved for {chosen_stock['ticker']}!")
+                        st.rerun()
+            else:
+                st.info("No matchups found.")
+    else:
+        st.info("🔒 Enter Commissioner PIN (1234) above to manage weekly rounds and earnings slates.")
