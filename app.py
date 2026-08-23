@@ -167,11 +167,25 @@ DEFAULT_DATA = {
     ]
 }
 
+SCHEMA_VERSION = "v3"
+DATA_FILE = os.path.join(os.path.dirname(__file__), f"league_data_{SCHEMA_VERSION}.json")
+
 def load_data():
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, "r") as f:
-                return json.load(f)
+                saved = json.load(f)
+                # Ensure all default week stocks exist in saved
+                for def_week in DEFAULT_DATA["weeks"]:
+                    saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
+                    if saved_week:
+                        existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
+                        for s in def_week.get("stocks", []):
+                            if s["ticker"] not in existing_tickers:
+                                saved_week["stocks"].append(s)
+                    else:
+                        saved.setdefault("weeks", []).append(def_week)
+                return saved
         except Exception:
             pass
     return DEFAULT_DATA
