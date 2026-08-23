@@ -551,87 +551,92 @@ with tab_matchups:
     if not stocks:
         st.info("No stock earnings matchups added for this week yet.")
     else:
-        # Table Header
-        h_ticker, h_date, h_price, h_cons, h_pick = st.columns([1.8, 1.4, 1.4, 2.8, 2.6])
-        with h_ticker:
-            st.markdown("**Ticker & Company**")
-        with h_date:
-            st.markdown("**Date & Time**")
-        with h_price:
-            st.markdown("**Price & Est.**")
-        with h_cons:
-            st.markdown("**Consensus & Votes**")
-        with h_pick:
-            st.markdown("**Your Pick (PIN Unlocked)**" if st.session_state.authenticated else "**Your Pick**")
-        
-        st.divider()
-        
-        # Table Rows
         for stock in stocks:
             votes = stock.get("votes", {})
-            my_vote = votes.get(active_user_id)
-            
+            my_vote = votes.get(active_user_id) if active_user_id else None
+
             total_votes = len(votes)
             up_votes = sum(1 for v in votes.values() if v == "UP")
             down_votes = sum(1 for v in votes.values() if v == "DOWN")
             neutral_votes = sum(1 for v in votes.values() if v == "NEUTRAL")
-            
-            up_pct = int((up_votes / total_votes * 100)) if total_votes > 0 else 33
-            down_pct = int((down_votes / total_votes * 100)) if total_votes > 0 else 33
-            neutral_pct = 100 - up_pct - down_pct if total_votes > 0 else 34
-            
-            row_c1, row_c2, row_c3, row_c4, row_c5 = st.columns([1.8, 1.4, 1.4, 2.8, 2.6])
-            
-            with row_c1:
-                cap_str = f" • ${stock['market_cap_b']}B" if stock.get("market_cap_b") else ""
-                st.markdown(f"**{stock['ticker']}** <span style='font-size:0.75rem; color:#94a3b8;'>{cap_str}</span>", unsafe_allow_html=True)
-                st.caption(f"{stock.get('company', stock['ticker'])[:20]}")
-            
-            with row_c2:
-                st.write(f"**{stock.get('date', 'TBD')}**")
-                t_badge = "AMC" if "AMC" in stock.get('timing', 'AMC') else "BMO"
-                st.caption(f"`{t_badge}`")
-                
-            with row_c3:
-                p_str = f"${stock.get('price'):.2f}" if stock.get("price") else "N/A"
-                eps_str = f"${stock.get('eps_est'):.2f}" if stock.get("eps_est") else "N/A"
-                st.write(f"**{p_str}**")
-                st.caption(f"EPS: {eps_str}")
-            
-            with row_c4:
-                st.progress(up_pct / 100)
-                st.caption(f"🟢 {up_votes} | ⚪ {neutral_votes} | 🔴 {down_votes}")
-                chips = []
-                for u in data["users"]:
-                    if u["id"] in votes:
-                        v = votes[u["id"]]
-                        v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else "⚪")
-                        chips.append(f"{u['avatar']} {u['name'].split()[0]} {v_icon}")
-                if chips:
-                    st.caption(" ".join(chips))
-            
-            with row_c5:
-                b1, b2, b3 = st.columns(3)
-                with b1:
-                    btn_up_type = "primary" if my_vote == "UP" else "secondary"
-                    if st.button("🟢", key=f"btn_up_{stock['id']}", disabled=not st.session_state.authenticated or not active_user_id, type=btn_up_type, use_container_width=True):
-                        stock.setdefault("votes", {})[active_user_id] = "UP"
-                        save_data(data)
-                        st.rerun()
-                with b2:
-                    btn_neu_type = "primary" if my_vote == "NEUTRAL" else "secondary"
-                    if st.button("⚪", key=f"btn_neu_{stock['id']}", disabled=not st.session_state.authenticated or not active_user_id, type=btn_neu_type, use_container_width=True):
-                        stock.setdefault("votes", {})[active_user_id] = "NEUTRAL"
-                        save_data(data)
-                        st.rerun()
-                with b3:
-                    btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
-                    if st.button("🔴", key=f"btn_down_{stock['id']}", disabled=not st.session_state.authenticated or not active_user_id, type=btn_down_type, use_container_width=True):
-                        stock.setdefault("votes", {})[active_user_id] = "DOWN"
-                        save_data(data)
-                        st.rerun()
-            
-            st.divider()
+            up_pct = int((up_votes / total_votes * 100)) if total_votes > 0 else 0
+
+            t_badge = "🌙 After Close" if "AMC" in stock.get("timing", "") else "🌅 Before Open"
+            p_str = f"${stock.get('price'):.2f}" if stock.get("price") else "—"
+            eps_str = f"${stock.get('eps_est'):.2f}" if stock.get("eps_est") else "—"
+            cap_str = f"${stock.get('market_cap_b', '')}B" if stock.get("market_cap_b") else ""
+
+            # Friend picks chips
+            chips = []
+            for u in data["users"]:
+                if u["id"] in votes:
+                    v = votes[u["id"]]
+                    v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else "⚪")
+                    chips.append(f"{u['avatar']} {u['name'].split()[0]} {v_icon}")
+
+            # Vote label
+            if my_vote == "UP":
+                my_vote_label = "🟢 You picked UP"
+            elif my_vote == "DOWN":
+                my_vote_label = "🔴 You picked DOWN"
+            elif my_vote == "NEUTRAL":
+                my_vote_label = "⚪ You picked NEUTRAL"
+            else:
+                my_vote_label = ""
+
+            st.markdown(f"""
+<div style="
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:6px;">
+        <div>
+            <span style="font-size:1.25rem; font-weight:800; color:#f8fafc;">{stock['ticker']}</span>
+            <span style="font-size:0.8rem; color:#94a3b8; margin-left:8px;">{cap_str}</span><br>
+            <span style="font-size:0.85rem; color:#cbd5e1;">{stock.get('company', stock['ticker'])}</span>
+        </div>
+        <div style="text-align:right;">
+            <span style="font-size:0.8rem; color:#38bdf8; font-weight:600;">{stock.get('date','TBD')}</span><br>
+            <span style="font-size:0.75rem; color:#94a3b8;">{t_badge}</span>
+        </div>
+    </div>
+    <div style="display:flex; gap:20px; margin-top:10px; flex-wrap:wrap;">
+        <div><span style="color:#94a3b8; font-size:0.75rem;">PRICE</span><br><span style="font-weight:700; color:#f8fafc;">{p_str}</span></div>
+        <div><span style="color:#94a3b8; font-size:0.75rem;">EST. EPS</span><br><span style="font-weight:700; color:#f8fafc;">{eps_str}</span></div>
+        <div><span style="color:#94a3b8; font-size:0.75rem;">VOTES</span><br><span style="font-weight:700; color:#f8fafc;">🟢{up_votes} ⚪{neutral_votes} 🔴{down_votes}</span></div>
+    </div>
+    {"<div style='margin-top:8px; font-size:0.78rem; color:#94a3b8;'>" + "  ".join(chips) + "</div>" if chips else ""}
+    {"<div style='margin-top:6px; font-size:0.82rem; font-weight:600; color:#38bdf8;'>" + my_vote_label + "</div>" if my_vote_label else ""}
+</div>
+""", unsafe_allow_html=True)
+
+            # Vote buttons — full width, easy to tap on mobile
+            can_vote = st.session_state.authenticated and bool(active_user_id)
+            b1, b2, b3 = st.columns(3)
+            with b1:
+                btn_up_type = "primary" if my_vote == "UP" else "secondary"
+                if st.button("🟢 UP", key=f"btn_up_{stock['id']}", disabled=not can_vote, type=btn_up_type, use_container_width=True):
+                    stock.setdefault("votes", {})[active_user_id] = "UP"
+                    save_data(data)
+                    st.rerun()
+            with b2:
+                btn_neu_type = "primary" if my_vote == "NEUTRAL" else "secondary"
+                if st.button("⚪ NEU", key=f"btn_neu_{stock['id']}", disabled=not can_vote, type=btn_neu_type, use_container_width=True):
+                    stock.setdefault("votes", {})[active_user_id] = "NEUTRAL"
+                    save_data(data)
+                    st.rerun()
+            with b3:
+                btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
+                if st.button("🔴 DOWN", key=f"btn_down_{stock['id']}", disabled=not can_vote, type=btn_down_type, use_container_width=True):
+                    stock.setdefault("votes", {})[active_user_id] = "DOWN"
+                    save_data(data)
+                    st.rerun()
+
+            st.markdown("<div style='margin-bottom:6px'></div>", unsafe_allow_html=True)
+
 
 # Tab 2: Leaderboard
 with tab_leaderboard:
