@@ -16,6 +16,15 @@ st.set_page_config(
 # Custom Styling (Dark FinTech Aesthetics, hide sidebar)
 st.markdown("""
 <style>
+    /* Dark Theme Background */
+    .stApp {
+        background-color: #0b0f19 !important;
+        background-image: 
+            radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.08) 0%, transparent 45%) !important;
+        color: #f8fafc !important;
+    }
+    
     /* Hide Streamlit Sidebar completely */
     [data-testid="stSidebar"], section[data-testid="stSidebar"] {
         display: none !important;
@@ -24,29 +33,27 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Modern FinTech Header */
-    .brand-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 18px 24px;
-        margin-bottom: 20px;
+    /* Dark Container Cards */
+    [data-testid="stVerticalBlock"] > div[data-testid="element-container"],
+    .stock-card {
+        color: #f8fafc;
     }
     
-    .stock-card {
-        background: rgba(30, 41, 59, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 16px;
+    /* Inputs, Selectboxes, and Expander styling */
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: #1e293b !important;
+        color: #f8fafc !important;
+        border-radius: 8px;
     }
     
     div[data-testid="stMetricValue"] {
         font-size: 24px;
         font-weight: 700;
+        color: #38bdf8 !important;
+    }
+    
+    div[data-testid="stMetricLabel"] {
+        color: #94a3b8 !important;
     }
 </style>
 """, unsafe_allow_html=True)
