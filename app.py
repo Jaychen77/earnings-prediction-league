@@ -350,10 +350,20 @@ def load_data():
         try:
             resp = sb.table(SUPABASE_TABLE).select("state_json").eq("id", 1).execute()
             if resp.data and len(resp.data) > 0:
+                # Row found — load from Supabase
                 saved = json.loads(resp.data[0]["state_json"])
                 return _merge_defaults(saved)
-        except Exception:
-            pass
+            else:
+                # Table is empty — seed it with default data right now
+                seed = _merge_defaults(dict(DEFAULT_DATA))
+                sb.table(SUPABASE_TABLE).upsert({
+                    "id": 1,
+                    "state_json": json.dumps(seed),
+                    "updated_at": datetime.now().isoformat()
+                }).execute()
+                return seed
+        except Exception as e:
+            st.sidebar.error(f"⚠️ Supabase error: {e}")
 
     # 2. Fallback: local file
     if os.path.exists(DATA_FILE):
@@ -383,8 +393,8 @@ def save_data(data):
                 "state_json": state_json,
                 "updated_at": datetime.now().isoformat()
             }).execute()
-        except Exception:
-            pass
+        except Exception as e:
+            st.sidebar.error(f"⚠️ Supabase save error: {e}")
 
 @st.cache_data(ttl=86400) # Auto-refresh daily (every 24 hours)
 def fetch_live_stock_data(ticker_list):
