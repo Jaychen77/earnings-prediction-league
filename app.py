@@ -363,7 +363,7 @@ def load_data():
                 }).execute()
                 return seed
         except Exception as e:
-            st.sidebar.error(f"⚠️ Supabase error: {e}")
+            st.warning(f"⚠️ Supabase error: {e}")
 
     # 2. Fallback: local file
     if os.path.exists(DATA_FILE):
@@ -394,7 +394,7 @@ def save_data(data):
                 "updated_at": datetime.now().isoformat()
             }).execute()
         except Exception as e:
-            st.sidebar.error(f"⚠️ Supabase save error: {e}")
+            st.warning(f"⚠️ Supabase save error: {e}")
 
 @st.cache_data(ttl=86400) # Auto-refresh daily (every 24 hours)
 def fetch_live_stock_data(ticker_list):
