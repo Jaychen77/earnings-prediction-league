@@ -597,13 +597,17 @@ with tab_matchups:
             eps_str = f"${stock.get('eps_est'):.2f}" if stock.get("eps_est") else "—"
             cap_str = f"${stock.get('market_cap_b', '')}B" if stock.get("market_cap_b") else ""
 
-            # Friend picks chips
+            # Friend picks chips & notes
             chips = []
+            notes = stock.get("notes", {})
             for u in data["users"]:
-                if u["id"] in votes:
-                    v = votes[u["id"]]
-                    v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else "⚪")
-                    chips.append(f"{u['avatar']} {u['name'].split()[0]} {v_icon}")
+                uid = u["id"]
+                u_name = u["name"].split()[0]
+                if uid in votes or uid in notes:
+                    v = votes.get(uid)
+                    v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else ("⚪" if v == "NEUTRAL" else "⏭️"))
+                    u_note = f' — "{notes[uid]}"' if uid in notes and notes[uid].strip() else ""
+                    chips.append(f"{u['avatar']} **{u_name}** {v_icon}{u_note}")
 
             # Vote label
             if my_vote == "UP":
@@ -628,6 +632,12 @@ with tab_matchups:
                 status_badge = "<span style='color:#38bdf8; font-weight:600;'>✏️ Pick Saved (Editable until cutoff)</span>"
             else:
                 status_badge = "<span style='color:#4ade80; font-weight:600;'>🟢 Voting Open</span>"
+
+            # Render comments HTML inside card
+            notes_html = ""
+            if chips:
+                chips_lines = "<br>".join([f"<div style='margin-top:4px;'>{c}</div>" for c in chips])
+                notes_html = f"<div style='margin-top:10px; padding-top:8px; border-top:1px solid #334155; font-size:0.82rem; color:#cbd5e1;'><strong>💬 Friend Picks & Thoughts:</strong><br>{chips_lines}</div>"
 
             st.markdown(f"""
 <div style="
@@ -654,12 +664,12 @@ with tab_matchups:
         <div><span style="color:#94a3b8; font-size:0.75rem;">EST. EPS</span><br><span style="font-weight:700; color:#f8fafc;">{eps_str}</span></div>
         <div><span style="color:#94a3b8; font-size:0.75rem;">VOTES</span><br><span style="font-weight:700; color:#f8fafc;">🟢{up_votes} ⚪{neutral_votes} 🔴{down_votes}</span></div>
     </div>
-    {"<div style='margin-top:8px; font-size:0.78rem; color:#94a3b8;'>" + "  ".join(chips) + "</div>" if chips else ""}
-    {"<div style='margin-top:6px; font-size:0.82rem; font-weight:600; color:#38bdf8;'>" + my_vote_label + "</div>" if my_vote_label else ""}
+    {notes_html}
+    {"<div style='margin-top:8px; font-size:0.82rem; font-weight:600; color:#38bdf8;'>" + my_vote_label + "</div>" if my_vote_label else ""}
 </div>
 """, unsafe_allow_html=True)
 
-            # Vote buttons — full width, disabled if locked or already voted
+            # Vote buttons — full width, disabled if locked or no user selected
             b1, b2, b3 = st.columns(3)
             with b1:
                 btn_up_type = "primary" if my_vote == "UP" else "secondary"
@@ -680,7 +690,30 @@ with tab_matchups:
                     save_data(data)
                     st.rerun()
 
-            st.markdown("<div style='margin-bottom:6px'></div>", unsafe_allow_html=True)
+            # Thoughts & Analysis note box (Feature 1)
+            if st.session_state.authenticated and active_user_id and not is_locked:
+                cur_note = stock.setdefault("notes", {}).get(active_user_id, "")
+                with st.expander("💬 Add Your Thought / Reason / Price Target", expanded=bool(cur_note)):
+                    c_txt, c_btn = st.columns([4, 1])
+                    with c_txt:
+                        new_note = st.text_input(
+                            "Your Commentary", 
+                            value=cur_note, 
+                            key=f"note_input_{stock['id']}", 
+                            placeholder="e.g. Guidance will disappoint, fading into morning open...",
+                            label_visibility="collapsed"
+                        )
+                    with c_btn:
+                        if st.button("Save", key=f"save_note_{stock['id']}", use_container_width=True):
+                            if new_note.strip():
+                                stock["notes"][active_user_id] = new_note.strip()
+                            elif active_user_id in stock["notes"]:
+                                del stock["notes"][active_user_id]
+                            save_data(data)
+                            st.success("Saved!")
+                            st.rerun()
+
+            st.markdown("<div style='margin-bottom:8px'></div>", unsafe_allow_html=True)
 
 
 
