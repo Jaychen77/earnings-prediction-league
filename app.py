@@ -400,11 +400,12 @@ with tab_matchups:
                     st.write("**Cast Your Prediction**")
                     if not st.session_state.authenticated:
                         with st.popover("🔒 Unlock Voting (PIN)"):
-                            pin_try = st.text_input("Enter Voting PIN", type="password", key=f"pin_{stock['id']}")
-                            if st.button("Unlock", key=f"btn_unlock_{stock['id']}"):
-                                if pin_try == VOTE_PASSWORD:
+                            st.caption("Enter league PIN to unlock predictions:")
+                            pin_try = st.text_input("League PIN", type="password", key=f"pin_{stock['id']}", autocomplete="new-password", placeholder="Enter 9-digit PIN...")
+                            if st.button("Unlock Voting", key=f"btn_unlock_{stock['id']}", use_container_width=True):
+                                if pin_try.strip() == VOTE_PASSWORD:
                                     st.session_state.authenticated = True
-                                    st.success("Unlocked! You can now cast your votes.")
+                                    st.success("Unlocked! Cast your UP/DOWN votes below.")
                                     st.rerun()
                                 else:
                                     st.error("Incorrect PIN")
