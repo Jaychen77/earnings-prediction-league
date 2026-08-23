@@ -137,16 +137,37 @@ if "data" not in st.session_state:
 
 data = st.session_state.data
 
-# Top Bar Header: Voter Selector & League Branding (No Sidebar)
+# Top Bar Header: Voter Selector, Add User for Jay, & League Branding
 h_col1, h_col2 = st.columns([3, 2])
 with h_col1:
     st.markdown("## 📈 Earnings**Beat**")
-    st.caption("Weekly Stock Up/Down Prediction League • Jay, Stan & Edwin")
+    st.caption("Weekly Stock Up/Down Prediction League")
 
 with h_col2:
     user_options = {f"{u['avatar']} {u['name']}": u['id'] for u in data["users"]}
     selected_user_label = st.selectbox("🎯 Voting As:", list(user_options.keys()), index=0)
     active_user_id = user_options[selected_user_label]
+
+# Only You Can Add Users
+with st.expander("👤 Add New Friend to League (Commissioner)", expanded=False):
+    with st.form("add_user_form", clear_on_submit=True):
+        u_col1, u_col2 = st.columns([2, 1])
+        with u_col1:
+            new_friend_name = st.text_input("Friend's Display Name")
+        with u_col2:
+            new_friend_avatar = st.selectbox("Avatar Icon", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄", "🦅", "🦈"])
+        
+        if st.form_submit_button("➕ Add to League"):
+            if new_friend_name.strip():
+                new_user = {
+                    "id": f"user-{int(datetime.now().timestamp()*1000)}",
+                    "name": new_friend_name.strip(),
+                    "avatar": new_friend_avatar
+                }
+                data["users"].append(new_user)
+                save_data(data)
+                st.success(f"Added {new_friend_name} to the league!")
+                st.rerun()
 
 st.divider()
 
