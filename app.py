@@ -451,30 +451,54 @@ if "data" not in st.session_state:
 
 data = st.session_state.data
 
-# Top Bar Header: Voter Selector, Add User for Jay, & League Branding
-h_col1, h_col2, h_col3 = st.columns([2.5, 1.8, 1.7])
+if "active_user_id" not in st.session_state:
+    st.session_state.active_user_id = None
+
+# Top Bar Header: Branding | Who Are You | Passcode
+h_col1, h_col2, h_col3 = st.columns([2.2, 2.0, 1.8])
 with h_col1:
     st.markdown("## 📈 Earnings**Beat**")
-    st.caption("Weekly Stock Up/Down Prediction League (>$50B Cap)")
+    st.caption("Weekly Stock Prediction League • >$50B Cap")
 
 with h_col2:
-    user_options = {f"{u['avatar']} {u['name']}": u['id'] for u in data["users"]}
-    selected_user_label = st.selectbox("🎯 Voting As:", list(user_options.keys()), index=0)
-    active_user_id = user_options[selected_user_label]
+    user_labels = ["— Select who you are —"] + [f"{u['avatar']} {u['name']}" for u in data["users"]]
+    user_id_map = {f"{u['avatar']} {u['name']}": u['id'] for u in data["users"]}
+    selected_label = st.selectbox(
+        "👤 Who are you?",
+        user_labels,
+        index=0,
+        help="Pick your name before voting"
+    )
+    if selected_label == "— Select who you are —":
+        active_user_id = None
+        st.session_state.active_user_id = None
+    else:
+        active_user_id = user_id_map[selected_label]
+        st.session_state.active_user_id = active_user_id
 
 with h_col3:
     if not st.session_state.authenticated:
-        pass_val = st.text_input("🔑 Passcode to Unlock", key="global_pass_key", placeholder="e.g. stock****")
+        pass_val = st.text_input(
+            "🔑 League Passcode",
+            key="global_pass_key",
+            placeholder="stock****",
+            help="Enter passcode to enable voting"
+        )
         if pass_val:
             if pass_val.strip() == VOTE_PASSWORD:
                 st.session_state.authenticated = True
-                st.success("Unlocked!")
+                st.success("✅ Unlocked!")
                 st.rerun()
             else:
-                st.caption("❌ Invalid passcode")
+                st.caption("❌ Wrong passcode")
     else:
-        st.write("")
-        st.caption("🔓 **League Unlocked**")
+        st.markdown("<div style='margin-top:28px'></div>", unsafe_allow_html=True)
+        st.success("🔓 League Unlocked")
+
+# Show prompt if no user selected
+if active_user_id is None:
+    st.info("👆 **Please select who you are** from the dropdown above to cast your predictions.")
+
 
 # Protected Controls: Add Member - ONLY visible if passcode unlocked
 if st.session_state.authenticated:
@@ -590,19 +614,19 @@ with tab_matchups:
                 b1, b2, b3 = st.columns(3)
                 with b1:
                     btn_up_type = "primary" if my_vote == "UP" else "secondary"
-                    if st.button("🟢", key=f"btn_up_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_up_type, use_container_width=True):
+                    if st.button("🟢", key=f"btn_up_{stock['id']}", disabled=not st.session_state.authenticated or not active_user_id, type=btn_up_type, use_container_width=True):
                         stock.setdefault("votes", {})[active_user_id] = "UP"
                         save_data(data)
                         st.rerun()
                 with b2:
                     btn_neu_type = "primary" if my_vote == "NEUTRAL" else "secondary"
-                    if st.button("⚪", key=f"btn_neu_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_neu_type, use_container_width=True):
+                    if st.button("⚪", key=f"btn_neu_{stock['id']}", disabled=not st.session_state.authenticated or not active_user_id, type=btn_neu_type, use_container_width=True):
                         stock.setdefault("votes", {})[active_user_id] = "NEUTRAL"
                         save_data(data)
                         st.rerun()
                 with b3:
                     btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
-                    if st.button("🔴", key=f"btn_down_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_down_type, use_container_width=True):
+                    if st.button("🔴", key=f"btn_down_{stock['id']}", disabled=not st.session_state.authenticated or not active_user_id, type=btn_down_type, use_container_width=True):
                         stock.setdefault("votes", {})[active_user_id] = "DOWN"
                         save_data(data)
                         st.rerun()
