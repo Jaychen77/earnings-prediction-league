@@ -53,7 +53,7 @@ st.markdown("""
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "league_data.json")
 
-# Fixed default users (Jay, Stan, Edwin only - adding new users disabled)
+# Default Data: Starting with Week 34
 DEFAULT_DATA = {
     "users": [
         {"id": "user-1", "name": "Jay", "avatar": "🦁"},
@@ -62,16 +62,16 @@ DEFAULT_DATA = {
     ],
     "weeks": [
         {
-            "id": "week-current",
-            "name": "Week of " + datetime.now().strftime("%b %d, %Y"),
-            "date_range": datetime.now().strftime("%b %d, %Y"),
+            "id": "week-2026-34",
+            "name": "Week 34 (Aug 24 - Aug 28, 2026)",
+            "date_range": "Aug 24 - Aug 28, 2026",
             "stocks": [
                 {
                     "id": "s-1",
                     "ticker": "NVDA",
                     "company": "NVIDIA Corporation",
-                    "date": datetime.now().strftime("%Y-%m-%d"),
-                    "timing": "AMC",
+                    "date": "Aug 26 (Wed)",
+                    "timing": "AMC (After Close)",
                     "price": 128.50,
                     "eps_est": 0.68,
                     "actual_dir": None,
@@ -82,8 +82,8 @@ DEFAULT_DATA = {
                     "id": "s-2",
                     "ticker": "CRWD",
                     "company": "CrowdStrike Holdings",
-                    "date": datetime.now().strftime("%Y-%m-%d"),
-                    "timing": "AMC",
+                    "date": "Aug 27 (Thu)",
+                    "timing": "AMC (After Close)",
                     "price": 265.40,
                     "eps_est": 0.98,
                     "actual_dir": None,
@@ -94,8 +94,8 @@ DEFAULT_DATA = {
                     "id": "s-3",
                     "ticker": "SNOW",
                     "company": "Snowflake Inc",
-                    "date": datetime.now().strftime("%Y-%m-%d"),
-                    "timing": "AMC",
+                    "date": "Aug 27 (Thu)",
+                    "timing": "AMC (After Close)",
                     "price": 132.80,
                     "eps_est": 0.16,
                     "actual_dir": None,
@@ -106,10 +106,22 @@ DEFAULT_DATA = {
                     "id": "s-4",
                     "ticker": "DELL",
                     "company": "Dell Technologies",
-                    "date": datetime.now().strftime("%Y-%m-%d"),
-                    "timing": "AMC",
+                    "date": "Aug 28 (Fri)",
+                    "timing": "AMC (After Close)",
                     "price": 139.10,
                     "eps_est": 1.73,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-5",
+                    "ticker": "PDD",
+                    "company": "PDD Holdings (Temu)",
+                    "date": "Aug 28 (Fri)",
+                    "timing": "BMO (Before Open)",
+                    "price": 142.10,
+                    "eps_est": 2.73,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
