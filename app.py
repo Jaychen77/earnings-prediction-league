@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom Styling (Dark FinTech Aesthetics, hide sidebar)
+# Custom Styling (Dark FinTech Aesthetics, Mobile Responsive & Touch Optimized)
 st.markdown("""
 <style>
     /* Dark Theme Background */
@@ -26,34 +26,77 @@ st.markdown("""
     }
     
     /* Hide Streamlit Sidebar completely */
-    [data-testid="stSidebar"], section[data-testid="stSidebar"] {
-        display: none !important;
-    }
-    div[data-testid="collapsedControl"] {
+    [data-testid="stSidebar"], section[data-testid="stSidebar"], div[data-testid="collapsedControl"] {
         display: none !important;
     }
     
-    /* Dark Container Cards */
-    [data-testid="stVerticalBlock"] > div[data-testid="element-container"],
-    .stock-card {
-        color: #f8fafc;
+    /* App Container Padding for Mobile */
+    .main .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 0.8rem !important;
+        padding-right: 0.8rem !important;
+        max-width: 1100px;
     }
     
-    /* Inputs, Selectboxes, and Expander styling */
-    .stSelectbox div[data-baseweb="select"] {
+    /* Touch-Friendly Buttons */
+    .stButton > button {
+        border-radius: 8px !important;
+        padding: 6px 10px !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        min-height: 38px !important;
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .stButton > button:active {
+        transform: scale(0.96);
+    }
+    
+    /* Modern FinTech Typography & Metrics */
+    div[data-testid="stMetricValue"] {
+        font-size: 20px !important;
+        font-weight: 800 !important;
+        color: #38bdf8 !important;
+    }
+    
+    div[data-testid="stMetricLabel"] {
+        font-size: 13px !important;
+        color: #94a3b8 !important;
+    }
+    
+    /* Selectboxes and Inputs */
+    .stSelectbox div[data-baseweb="select"], .stTextInput > div > div {
         background-color: #1e293b !important;
         color: #f8fafc !important;
         border-radius: 8px;
     }
     
-    div[data-testid="stMetricValue"] {
-        font-size: 24px;
-        font-weight: 700;
-        color: #38bdf8 !important;
-    }
-    
-    div[data-testid="stMetricLabel"] {
-        color: #94a3b8 !important;
+    /* Mobile-Specific Breakpoints */
+    @media (max-width: 768px) {
+        .main .block-container {
+            padding-left: 0.4rem !important;
+            padding-right: 0.4rem !important;
+        }
+        
+        /* Adjust Column Spacing on phones */
+        div[data-testid="column"] {
+            padding: 2px 4px !important;
+        }
+        
+        /* Compact typography on small screens */
+        h2 {
+            font-size: 1.5rem !important;
+        }
+        
+        p, span, label {
+            font-size: 0.88rem !important;
+        }
+        
+        .stButton > button {
+            padding: 4px 6px !important;
+            font-size: 0.85rem !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
