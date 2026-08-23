@@ -580,7 +580,7 @@ with tab_matchups:
     stat_c2.metric("Your Predictions", f"{my_votes_count} / {total_stocks}")
     stat_c3.metric("Active League Members", len(data["users"]))
     
-    st.caption("🏁 **Official Rule:** Votes lock **1 hour before earnings report** (3:00 PM ET for AMC / 8:00 AM ET for BMO). Picks cannot be changed once submitted. Winners decided by **Friday Market Close Price** vs Pre-Earnings Price. &nbsp; 🟢 **UP** (> +0.5%) &nbsp;|&nbsp; ⚪ **NEUTRAL** (±0.5%) &nbsp;|&nbsp; 🔴 **DOWN** (< -0.5%)")
+    st.caption("🏁 **Official Rule:** Votes can be changed freely until **1 hour before earnings** (3:00 PM ET for AMC / 8:00 AM ET for BMO), after which they lock permanently. Winners decided by **Friday Market Close Price** vs Pre-Earnings Price. &nbsp; 🟢 **UP** (> +0.5%) &nbsp;|&nbsp; ⚪ **NEUTRAL** (±0.5%) &nbsp;|&nbsp; 🔴 **DOWN** (< -0.5%)")
     st.divider()
     
     if not stocks:
@@ -619,18 +619,17 @@ with tab_matchups:
             else:
                 my_vote_label = ""
 
-            # Lock check: Cannot vote after earnings, or change vote if locked
+            # Lock check: Can change vote freely until 1 hour before earnings cutoff
             is_locked, lock_reason = is_stock_locked(stock)
-            has_already_voted = my_vote is not None
             
-            # Can vote only if authenticated, user picked, earnings not passed, and not already voted
-            can_vote = st.session_state.authenticated and bool(active_user_id) and not is_locked and not has_already_voted
+            # Can vote/change only if authenticated, user selected, and cutoff hasn't passed
+            can_vote = st.session_state.authenticated and bool(active_user_id) and not is_locked
 
             # Status badge for card
             if is_locked:
                 status_badge = f"<span style='color:#f87171; font-weight:700;'>🔒 {lock_reason}</span>"
-            elif has_already_voted:
-                status_badge = "<span style='color:#38bdf8; font-weight:700;'>🔒 Pick Locked In</span>"
+            elif my_vote is not None:
+                status_badge = "<span style='color:#38bdf8; font-weight:600;'>✏️ Pick Saved (Editable until cutoff)</span>"
             else:
                 status_badge = "<span style='color:#4ade80; font-weight:600;'>🟢 Voting Open</span>"
 
