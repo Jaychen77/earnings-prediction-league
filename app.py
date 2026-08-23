@@ -319,10 +319,8 @@ DEFAULT_DATA = {
 
 SCHEMA_VERSION = "v3"
 DATA_FILE = os.path.join(os.path.dirname(__file__), f"league_data_{SCHEMA_VERSION}.json")
-GITHUB_REPO = "Jaychen77/earnings-prediction-league"
-GITHUB_PATH = f"league_data_{SCHEMA_VERSION}.json"
+SUPABASE_TABLE = "earningsbeat_state"
 
-# --- GitHub API Persistence ---
 def _merge_defaults(saved):
     """Merge any missing default stocks/weeks into saved data."""
     for def_week in DEFAULT_DATA["weeks"]:
@@ -336,22 +334,26 @@ def _merge_defaults(saved):
             saved.setdefault("weeks", []).append(def_week)
     return saved
 
-def load_data():
-    # 1. Try loading from GitHub
+def get_supabase():
     try:
-        token = st.secrets.get("github", {}).get("token", "")
-        headers = {"Accept": "application/vnd.github.v3.raw"}
-        if token:
-            headers["Authorization"] = f"token {token}"
-        resp = __import__("requests").get(
-            f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/{GITHUB_PATH}",
-            headers=headers, timeout=5
-        )
-        if resp.status_code == 200:
-            saved = resp.json()
-            return _merge_defaults(saved)
+        from supabase import create_client
+        url = st.secrets["supabase"]["url"]
+        key = st.secrets["supabase"]["key"]
+        return create_client(url, key)
     except Exception:
-        pass
+        return None
+
+def load_data():
+    # 1. Try Supabase
+    sb = get_supabase()
+    if sb:
+        try:
+            resp = sb.table(SUPABASE_TABLE).select("state_json").eq("id", 1).execute()
+            if resp.data and len(resp.data) > 0:
+                saved = json.loads(resp.data[0]["state_json"])
+                return _merge_defaults(saved)
+        except Exception:
+            pass
 
     # 2. Fallback: local file
     if os.path.exists(DATA_FILE):
@@ -364,35 +366,25 @@ def load_data():
     return DEFAULT_DATA
 
 def save_data(data):
-    # Always write local file
+    # Always write local backup
     try:
         with open(DATA_FILE, "w") as f:
             json.dump(data, f, indent=2)
     except Exception:
         pass
 
-    # Push to GitHub via API
-    try:
-        token = st.secrets.get("github", {}).get("token", "")
-        if not token:
-            return
-        import requests, base64
-        api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
-        headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-        # Get current SHA (needed for update)
-        get_resp = requests.get(api_url, headers=headers, timeout=5)
-        sha = get_resp.json().get("sha", "") if get_resp.status_code == 200 else ""
-        content = base64.b64encode(json.dumps(data, indent=2).encode()).decode()
-        payload = {
-            "message": f"Auto-save: league data {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-            "content": content,
-            "branch": "main"
-        }
-        if sha:
-            payload["sha"] = sha
-        requests.put(api_url, headers=headers, json=payload, timeout=10)
-    except Exception:
-        pass
+    # Save to Supabase (upsert single row with id=1)
+    sb = get_supabase()
+    if sb:
+        try:
+            state_json = json.dumps(data)
+            sb.table(SUPABASE_TABLE).upsert({
+                "id": 1,
+                "state_json": state_json,
+                "updated_at": datetime.now().isoformat()
+            }).execute()
+        except Exception:
+            pass
 
 @st.cache_data(ttl=86400) # Auto-refresh daily (every 24 hours)
 def fetch_live_stock_data(ticker_list):
