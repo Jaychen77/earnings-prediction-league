@@ -336,18 +336,25 @@ def load_data():
     if conn:
         try:
             df = conn.read(worksheet="league_state", ttl=0)
-            if df is not None and not df.empty and "json_data" in df.columns:
-                saved = json.loads(df["json_data"].iloc[0])
-                for def_week in DEFAULT_DATA["weeks"]:
-                    saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
-                    if saved_week:
-                        existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
-                        for s in def_week.get("stocks", []):
-                            if s["ticker"] not in existing_tickers:
-                                saved_week["stocks"].append(s)
-                    else:
-                        saved.setdefault("weeks", []).append(def_week)
-                return saved
+            if df is not None and not df.empty:
+                raw_json = None
+                if "_raw_state" in df.columns and pd.notna(df["_raw_state"].iloc[0]):
+                    raw_json = df["_raw_state"].iloc[0]
+                elif "json_data" in df.columns and pd.notna(df["json_data"].iloc[0]):
+                    raw_json = df["json_data"].iloc[0]
+                
+                if raw_json:
+                    saved = json.loads(raw_json)
+                    for def_week in DEFAULT_DATA["weeks"]:
+                        saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
+                        if saved_week:
+                            existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
+                            for s in def_week.get("stocks", []):
+                                if s["ticker"] not in existing_tickers:
+                                    saved_week["stocks"].append(s)
+                        else:
+                            saved.setdefault("weeks", []).append(def_week)
+                    return saved
         except Exception:
             pass
 
@@ -369,20 +376,43 @@ def load_data():
             pass
     return DEFAULT_DATA
 
+def format_sheet_tables(data):
+    # 1. Matchups & Votes Table
+    rows = []
+    for w in data.get("weeks", []):
+        for s in w.get("stocks", []):
+            r = {
+                "Week": w.get("name", ""),
+                "Ticker": s.get("ticker", ""),
+                "Company": s.get("company", ""),
+                "Date": s.get("date", ""),
+                "Timing": s.get("timing", ""),
+                "Price ($)": s.get("price", ""),
+                "Est. EPS": s.get("eps_est", ""),
+                "Cap ($B)": s.get("market_cap_b", ""),
+            }
+            # Friend picks
+            for u in data.get("users", []):
+                r[f"Pick_{u['name']}"] = s.get("votes", {}).get(u["id"], "—")
+            rows.append(r)
+    df_votes = pd.DataFrame(rows)
+    return df_votes
+
 def save_data(data):
-    # Save to local file
+    # Save to local backup file
     try:
         with open(DATA_FILE, "w") as f:
             json.dump(data, f, indent=2)
     except Exception:
         pass
     
-    # Save to Google Sheets if connected
+    # Save directly to Google Sheets
     conn = get_gsheets_connection()
     if conn:
         try:
-            df = pd.DataFrame([{"json_data": json.dumps(data), "updated_at": datetime.now().isoformat()}])
-            conn.update(worksheet="league_state", data=df)
+            df_table = format_sheet_tables(data)
+            df_table["_raw_state"] = json.dumps(data)
+            conn.update(worksheet="league_state", data=df_table)
         except Exception:
             pass
 
@@ -436,6 +466,8 @@ if "authenticated" not in st.session_state:
 if "data" not in st.session_state:
     st.session_state.data = load_data()
     sync_daily_stock_data(st.session_state.data)
+    # Immediately populate Google Sheet with initial tables on startup
+    save_data(st.session_state.data)
 
 data = st.session_state.data
 
