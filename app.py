@@ -235,6 +235,12 @@ def sync_daily_stock_data(data):
         if updated:
             save_data(data)
 
+# Vote Authentication Password
+VOTE_PASSWORD = "stock2026"
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
 if "data" not in st.session_state:
     st.session_state.data = load_data()
     sync_daily_stock_data(st.session_state.data)
@@ -385,18 +391,29 @@ with tab_matchups:
                 
                 with c_action:
                     st.write("**Cast Your Prediction**")
+                    if not st.session_state.authenticated:
+                        with st.popover("🔒 Unlock Voting (PIN)"):
+                            pin_try = st.text_input("Enter Voting PIN", type="password", key=f"pin_{stock['id']}")
+                            if st.button("Unlock", key=f"btn_unlock_{stock['id']}"):
+                                if pin_try == VOTE_PASSWORD:
+                                    st.session_state.authenticated = True
+                                    st.success("Unlocked! You can now cast your votes.")
+                                    st.rerun()
+                                else:
+                                    st.error("Incorrect PIN")
+                    
                     b_col1, b_col2 = st.columns(2)
                     
                     with b_col1:
                         btn_up_type = "primary" if my_vote == "UP" else "secondary"
-                        if st.button(f"🟢 UP", key=f"btn_up_{stock['id']}", type=btn_up_type, use_container_width=True):
+                        if st.button(f"🟢 UP", key=f"btn_up_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_up_type, use_container_width=True):
                             stock.setdefault("votes", {})[active_user_id] = "UP"
                             save_data(data)
                             st.rerun()
                             
                     with b_col2:
                         btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
-                        if st.button(f"🔴 DOWN", key=f"btn_down_{stock['id']}", type=btn_down_type, use_container_width=True):
+                        if st.button(f"🔴 DOWN", key=f"btn_down_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_down_type, use_container_width=True):
                             stock.setdefault("votes", {})[active_user_id] = "DOWN"
                             save_data(data)
                             st.rerun()
