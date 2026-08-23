@@ -366,11 +366,15 @@ with tab_matchups:
             
             total_votes = len(votes)
             up_votes = sum(1 for v in votes.values() if v == "UP")
-            up_pct = int((up_votes / total_votes * 100)) if total_votes > 0 else 50
-            down_pct = 100 - up_pct
+            down_votes = sum(1 for v in votes.values() if v == "DOWN")
+            neutral_votes = sum(1 for v in votes.values() if v == "NEUTRAL")
+            
+            up_pct = int((up_votes / total_votes * 100)) if total_votes > 0 else 33
+            down_pct = int((down_votes / total_votes * 100)) if total_votes > 0 else 33
+            neutral_pct = 100 - up_pct - down_pct if total_votes > 0 else 34
             
             with st.container():
-                c_info, c_consensus, c_action = st.columns([2.5, 2, 2.5])
+                c_info, c_consensus, c_action = st.columns([2.5, 2.5, 2.5])
                 
                 with c_info:
                     timing_str = f"({stock.get('timing', 'AMC')})"
@@ -384,12 +388,13 @@ with tab_matchups:
                 with c_consensus:
                     st.write("**Group Consensus**")
                     st.progress(up_pct / 100)
-                    st.caption(f"🟢 {up_pct}% UP ({up_votes}) | 🔴 {down_pct}% DOWN ({total_votes - up_votes})")
+                    st.caption(f"🟢 {up_pct}% UP ({up_votes}) | ⚪ {neutral_pct}% NEUTRAL ({neutral_votes}) | 🔴 {down_pct}% DOWN ({down_votes})")
                     
                     chips = []
                     for u in data["users"]:
                         if u["id"] in votes:
-                            v_icon = "🟢" if votes[u["id"]] == "UP" else "🔴"
+                            v = votes[u["id"]]
+                            v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else "⚪")
                             chips.append(f"{u['avatar']} {u['name']} {v_icon}")
                     if chips:
                         st.write(" ".join(chips))
@@ -405,12 +410,12 @@ with tab_matchups:
                             if st.button("Unlock Voting", key=f"btn_unlock_{stock['id']}", use_container_width=True):
                                 if pin_try.strip() == VOTE_PASSWORD:
                                     st.session_state.authenticated = True
-                                    st.success("Unlocked! Cast your UP/DOWN votes below.")
+                                    st.success("Unlocked! Cast your votes below.")
                                     st.rerun()
                                 else:
                                     st.error("Incorrect PIN")
                     
-                    b_col1, b_col2 = st.columns(2)
+                    b_col1, b_col2, b_col3 = st.columns(3)
                     
                     with b_col1:
                         btn_up_type = "primary" if my_vote == "UP" else "secondary"
@@ -420,6 +425,13 @@ with tab_matchups:
                             st.rerun()
                             
                     with b_col2:
+                        btn_neu_type = "primary" if my_vote == "NEUTRAL" else "secondary"
+                        if st.button(f"⚪ NEU", key=f"btn_neu_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_neu_type, use_container_width=True):
+                            stock.setdefault("votes", {})[active_user_id] = "NEUTRAL"
+                            save_data(data)
+                            st.rerun()
+
+                    with b_col3:
                         btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
                         if st.button(f"🔴 DOWN", key=f"btn_down_{stock['id']}", disabled=not st.session_state.authenticated, type=btn_down_type, use_container_width=True):
                             stock.setdefault("votes", {})[active_user_id] = "DOWN"
