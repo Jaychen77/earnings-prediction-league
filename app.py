@@ -219,6 +219,45 @@ DEFAULT_DATA = {
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
+                },
+                {
+                    "id": "s-9",
+                    "ticker": "IBIT",
+                    "company": "iShares Bitcoin Trust ETF",
+                    "date": "Weekly Macro / ETF",
+                    "timing": "Weekly Tracker (Mon-Fri)",
+                    "price": 36.50,
+                    "eps_est": None,
+                    "market_cap_b": 22.5,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-10",
+                    "ticker": "USO",
+                    "company": "United States Oil Fund",
+                    "date": "Weekly Macro / ETF",
+                    "timing": "Weekly Tracker (Mon-Fri)",
+                    "price": 75.20,
+                    "eps_est": None,
+                    "market_cap_b": 1.4,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-11",
+                    "ticker": "LOW",
+                    "company": "Lowe's Companies, Inc.",
+                    "date": "Weekly Stock Tracker",
+                    "timing": "Weekly Tracker (Mon-Fri)",
+                    "price": 242.80,
+                    "eps_est": None,
+                    "market_cap_b": 138.0,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
                 }
             ]
         },
@@ -334,9 +373,18 @@ def is_stock_locked(stock):
     if stock.get("actual_dir") is not None:
         return True, "Reported (Locked)"
     
-    # Check by report date & timing if parseable
     d_str = stock.get("date", "")
     timing = stock.get("timing", "")
+
+    # Macro/Weekly tracker cutoff: Monday 9:30 AM ET market open of the active week
+    if "Weekly" in d_str or "Tracker" in timing:
+        # If today is Friday after 4pm, lock week
+        now = datetime.now()
+        if now.weekday() >= 5 or (now.weekday() == 4 and now.hour >= 16):
+            return True, "Week Closed (Locked)"
+        return False, ""
+    
+    # Check by report date & timing for standard earnings
     months = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, 
               "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
     try:
@@ -344,7 +392,6 @@ def is_stock_locked(stock):
         for m_name, m_num in months.items():
             if m_name in d_str.lower():
                 import re
-                # Find all numbers and use the last day number (e.g. if 'Aug 22 / Aug 25', pick 25)
                 day_matches = re.findall(r'\b(\d{1,2})\b', d_str)
                 if day_matches:
                     day = int(day_matches[-1])
@@ -530,28 +577,70 @@ if active_user_id is None:
     st.error("👆 **Please select who you are** from the dropdown above to cast your predictions.")
 
 
-# Protected Controls: Add Member - ONLY visible if passcode unlocked
+# Protected Controls: Add Member & Add Custom Stock/ETF - ONLY visible if passcode unlocked
 if st.session_state.authenticated:
-    with st.expander("👤 Add Member to League", expanded=False):
-        with st.form("add_user_form", clear_on_submit=True):
-            u_col1, u_col2 = st.columns([2, 1])
-            with u_col1:
-                new_friend_name = st.text_input("Friend's Display Name")
-            with u_col2:
-                new_friend_avatar = st.selectbox("Avatar Icon", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄", "🦅", "🦈"])
-            
-            if st.form_submit_button("➕ Add to League"):
-                if new_friend_name.strip():
-                    new_user = {
-                        "id": f"user-{int(datetime.now().timestamp()*1000)}",
-                        "name": new_friend_name.strip(),
-                        "avatar": new_friend_avatar
-                    }
-                    data["users"].append(new_user)
-                    save_data(data)
-                    st.success(f"Added {new_friend_name} to the league!")
-                    st.rerun()
+    c_ctrl1, c_ctrl2 = st.columns(2)
+    with c_ctrl1:
+        with st.expander("👤 Add Member to League", expanded=False):
+            with st.form("add_user_form", clear_on_submit=True):
+                u_col1, u_col2 = st.columns([2, 1])
+                with u_col1:
+                    new_friend_name = st.text_input("Friend's Display Name")
+                with u_col2:
+                    new_friend_avatar = st.selectbox("Avatar Icon", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄", "🦅", "🦈"])
+                
+                if st.form_submit_button("➕ Add to League"):
+                    if new_friend_name.strip():
+                        new_user = {
+                            "id": f"user-{int(datetime.now().timestamp()*1000)}",
+                            "name": new_friend_name.strip(),
+                            "avatar": new_friend_avatar
+                        }
+                        data["users"].append(new_user)
+                        save_data(data)
+                        st.success(f"Added {new_friend_name} to the league!")
+                        st.rerun()
 
+    with c_ctrl2:
+        with st.expander("📊 Add Custom Stock / ETF to Track", expanded=False):
+            with st.form("add_custom_ticker_form", clear_on_submit=True):
+                new_t_input = st.text_input("Ticker (e.g. IBIT, USO, SPY, TSLA, GLD)").upper().strip()
+                t_type = st.selectbox("Category", ["Weekly Macro / ETF", "Weekly Stock Tracker", "Earnings Matchup (AMC)", "Earnings Matchup (BMO)"])
+                
+                if st.form_submit_button("➕ Add Ticker to Lineup"):
+                    if new_t_input:
+                        try:
+                            t_info = yf.Ticker(new_t_input).info or {}
+                            c_name = t_info.get("shortName") or t_info.get("longName") or new_t_input
+                            c_price = t_info.get("currentPrice") or t_info.get("previousClose") or t_info.get("regularMarketPrice") or None
+                            c_mkt_cap = t_info.get("marketCap", 0) or 0
+                            c_mkt_cap_b = round(c_mkt_cap / 1e9, 1) if c_mkt_cap else 0
+                            c_eps = t_info.get("forwardEps") or t_info.get("trailingEps") or None
+
+                            active_week = data["weeks"][0]
+                            if not any(s["ticker"] == new_t_input for s in active_week.get("stocks", [])):
+                                is_macro = "Macro" in t_type or "Tracker" in t_type
+                                active_week.setdefault("stocks", []).append({
+                                    "id": f"s-custom-{int(datetime.now().timestamp()*1000)}",
+                                    "ticker": new_t_input,
+                                    "company": c_name,
+                                    "date": t_type if is_macro else "This Week",
+                                    "timing": "Weekly Tracker (Mon-Fri)" if is_macro else ("AMC (After Close)" if "AMC" in t_type else "BMO (Before Open)"),
+                                    "price": float(c_price) if c_price else None,
+                                    "eps_est": float(c_eps) if (c_eps and not is_macro) else None,
+                                    "market_cap_b": c_mkt_cap_b if c_mkt_cap_b else None,
+                                    "actual_dir": None,
+                                    "actual_pct": None,
+                                    "votes": {},
+                                    "notes": {}
+                                })
+                                save_data(data)
+                                st.success(f"✅ Added {new_t_input} ({c_name}) to weekly slate!")
+                                st.rerun()
+                            else:
+                                st.info(f"{new_t_input} is already in the lineup.")
+                        except Exception as e:
+                            st.error(f"Error adding ticker {new_t_input}: {e}")
 
 st.divider()
 
@@ -639,6 +728,10 @@ with tab_matchups:
                 chips_lines = "<br>".join([f"<div style='margin-top:4px;'>{c}</div>" for c in chips])
                 notes_html = f"<div style='margin-top:10px; padding-top:8px; border-top:1px solid #334155; font-size:0.82rem; color:#cbd5e1;'><strong>💬 Friend Picks & Thoughts:</strong><br>{chips_lines}</div>"
 
+            is_macro_asset = "Macro" in stock.get("date", "") or "Tracker" in stock.get("timing", "") or stock.get("eps_est") is None
+            stat_eps_label = "TYPE" if is_macro_asset else "EST. EPS"
+            stat_eps_val = "Macro / ETF" if is_macro_asset else f"${stock.get('eps_est'):.2f}"
+
             st.markdown(f"""
 <div style="
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -661,7 +754,7 @@ with tab_matchups:
     </div>
     <div style="display:flex; gap:20px; margin-top:10px; flex-wrap:wrap;">
         <div><span style="color:#94a3b8; font-size:0.75rem;">PRICE</span><br><span style="font-weight:700; color:#f8fafc;">{p_str}</span></div>
-        <div><span style="color:#94a3b8; font-size:0.75rem;">EST. EPS</span><br><span style="font-weight:700; color:#f8fafc;">{eps_str}</span></div>
+        <div><span style="color:#94a3b8; font-size:0.75rem;">{stat_eps_label}</span><br><span style="font-weight:700; color:#f8fafc;">{stat_eps_val}</span></div>
         <div><span style="color:#94a3b8; font-size:0.75rem;">VOTES</span><br><span style="font-weight:700; color:#f8fafc;">🟢{up_votes} ⚪{neutral_votes} 🔴{down_votes}</span></div>
     </div>
     {notes_html}
