@@ -705,6 +705,8 @@ with tab_matchups:
                 my_vote_label = "🔴 You picked DOWN"
             elif my_vote == "NEUTRAL":
                 my_vote_label = "⚪ You picked NEUTRAL"
+            elif my_vote == "SKIP":
+                my_vote_label = "⏭️ You chose to SKIP (No prediction)"
             else:
                 my_vote_label = ""
 
@@ -717,6 +719,8 @@ with tab_matchups:
             # Status badge for card
             if is_locked:
                 status_badge = f"<span style='color:#f87171; font-weight:700;'>🔒 {lock_reason}</span>"
+            elif my_vote == "SKIP":
+                status_badge = "<span style='color:#94a3b8; font-weight:600;'>⏭️ Skipped</span>"
             elif my_vote is not None:
                 status_badge = "<span style='color:#38bdf8; font-weight:600;'>✏️ Pick Saved (Editable until cutoff)</span>"
             else:
@@ -762,8 +766,8 @@ with tab_matchups:
 </div>
 """, unsafe_allow_html=True)
 
-            # Vote buttons — full width, disabled if locked or no user selected
-            b1, b2, b3 = st.columns(3)
+            # Vote buttons — 4 options: UP, NEU, DOWN, SKIP
+            b1, b2, b3, b4 = st.columns(4)
             with b1:
                 btn_up_type = "primary" if my_vote == "UP" else "secondary"
                 if st.button("🟢 UP", key=f"btn_up_{stock['id']}", disabled=not can_vote, type=btn_up_type, use_container_width=True):
@@ -780,6 +784,12 @@ with tab_matchups:
                 btn_down_type = "primary" if my_vote == "DOWN" else "secondary"
                 if st.button("🔴 DOWN", key=f"btn_down_{stock['id']}", disabled=not can_vote, type=btn_down_type, use_container_width=True):
                     stock.setdefault("votes", {})[active_user_id] = "DOWN"
+                    save_data(data)
+                    st.rerun()
+            with b4:
+                btn_skip_type = "primary" if my_vote == "SKIP" else "secondary"
+                if st.button("⏭️ SKIP", key=f"btn_skip_{stock['id']}", disabled=not can_vote, type=btn_skip_type, use_container_width=True):
+                    stock.setdefault("votes", {})[active_user_id] = "SKIP"
                     save_data(data)
                     st.rerun()
 
@@ -822,7 +832,7 @@ with tab_leaderboard:
             if actual:
                 for uid in scores.keys():
                     pick = s.get("votes", {}).get(uid)
-                    if pick:
+                    if pick and pick != "SKIP":
                         scores[uid]["total"] += 1
                         if pick == actual:
                             scores[uid]["wins"] += 1
