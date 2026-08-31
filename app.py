@@ -103,7 +103,7 @@ st.markdown("""
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "league_data.json")
 
-# Default Data: Starting with Week 34
+# Default Data
 DEFAULT_DATA = {
     "users": [
         {"id": "user-1", "name": "Jay", "avatar": "🦁"},
@@ -125,8 +125,8 @@ DEFAULT_DATA = {
                     "price": 665.00,
                     "eps_est": 1.85,
                     "market_cap_b": 182.4,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "UP",
+                    "actual_pct": 3.2,
                     "votes": {}
                 },
                 {
@@ -138,8 +138,8 @@ DEFAULT_DATA = {
                     "price": 575.00,
                     "eps_est": 3.28,
                     "market_cap_b": 87.2,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "UP",
+                    "actual_pct": 1.8,
                     "votes": {}
                 },
                 {
@@ -151,8 +151,8 @@ DEFAULT_DATA = {
                     "price": 128.50,
                     "eps_est": 0.68,
                     "market_cap_b": 3150.0,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "DOWN",
+                    "actual_pct": -6.4,
                     "votes": {}
                 },
                 {
@@ -164,8 +164,8 @@ DEFAULT_DATA = {
                     "price": 265.40,
                     "eps_est": 0.98,
                     "market_cap_b": 64.8,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "UP",
+                    "actual_pct": 2.1,
                     "votes": {}
                 },
                 {
@@ -177,8 +177,8 @@ DEFAULT_DATA = {
                     "price": 132.80,
                     "eps_est": 0.16,
                     "market_cap_b": 44.5,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "DOWN",
+                    "actual_pct": -14.7,
                     "votes": {}
                 },
                 {
@@ -190,8 +190,8 @@ DEFAULT_DATA = {
                     "price": 260.00,
                     "eps_est": 2.35,
                     "market_cap_b": 252.1,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "UP",
+                    "actual_pct": 0.9,
                     "votes": {}
                 },
                 {
@@ -203,8 +203,8 @@ DEFAULT_DATA = {
                     "price": 139.10,
                     "eps_est": 1.73,
                     "market_cap_b": 98.6,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "UP",
+                    "actual_pct": 4.3,
                     "votes": {}
                 },
                 {
@@ -216,8 +216,8 @@ DEFAULT_DATA = {
                     "price": 142.10,
                     "eps_est": 2.73,
                     "market_cap_b": 195.4,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "DOWN",
+                    "actual_pct": -28.5,
                     "votes": {}
                 },
                 {
@@ -229,8 +229,8 @@ DEFAULT_DATA = {
                     "price": 36.50,
                     "eps_est": None,
                     "market_cap_b": 22.5,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "DOWN",
+                    "actual_pct": -4.2,
                     "votes": {}
                 },
                 {
@@ -242,8 +242,8 @@ DEFAULT_DATA = {
                     "price": 75.20,
                     "eps_est": None,
                     "market_cap_b": 1.4,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "DOWN",
+                    "actual_pct": -1.5,
                     "votes": {}
                 },
                 {
@@ -255,8 +255,8 @@ DEFAULT_DATA = {
                     "price": 242.80,
                     "eps_est": None,
                     "market_cap_b": 138.0,
-                    "actual_dir": None,
-                    "actual_pct": None,
+                    "actual_dir": "UP",
+                    "actual_pct": 1.2,
                     "votes": {}
                 }
             ]
@@ -266,6 +266,19 @@ DEFAULT_DATA = {
             "name": "Week 35 (Aug 31 - Sep 04, 2026)",
             "date_range": "Aug 31 - Sep 04, 2026",
             "stocks": [
+                {
+                    "id": "s-w35-1",
+                    "ticker": "AVGO",
+                    "company": "Broadcom Inc.",
+                    "date": "Sep 02 (Wed)",
+                    "timing": "AMC (After Close)",
+                    "price": 160.00,
+                    "eps_est": 1.20,
+                    "market_cap_b": 745.0,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
                 {
                     "id": "s-w35-2",
                     "ticker": "LULU",
@@ -283,11 +296,115 @@ DEFAULT_DATA = {
                     "id": "s-w35-3",
                     "ticker": "NIO",
                     "company": "NIO Inc.",
-                    "date": "Sep 04 (Fri)",
+                    "date": "Sep 01 (Tue)",
                     "timing": "BMO (Before Open)",
                     "price": 4.10,
                     "eps_est": -0.31,
                     "market_cap_b": 8.5,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-4",
+                    "ticker": "MDB",
+                    "company": "MongoDB, Inc.",
+                    "date": "Sep 01 (Tue)",
+                    "timing": "AMC (After Close)",
+                    "price": 285.00,
+                    "eps_est": 0.49,
+                    "market_cap_b": 21.0,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-5",
+                    "ticker": "GTLB",
+                    "company": "GitLab Inc.",
+                    "date": "Sep 01 (Tue)",
+                    "timing": "AMC (After Close)",
+                    "price": 48.50,
+                    "eps_est": 0.10,
+                    "market_cap_b": 7.8,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-6",
+                    "ticker": "HPE",
+                    "company": "Hewlett Packard Enterprise",
+                    "date": "Sep 02 (Wed)",
+                    "timing": "AMC (After Close)",
+                    "price": 18.50,
+                    "eps_est": 0.47,
+                    "market_cap_b": 24.2,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-7",
+                    "ticker": "ZS",
+                    "company": "Zscaler, Inc.",
+                    "date": "Sep 03 (Thu)",
+                    "timing": "AMC (After Close)",
+                    "price": 195.00,
+                    "eps_est": 0.69,
+                    "market_cap_b": 29.5,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-8",
+                    "ticker": "DOCU",
+                    "company": "DocuSign, Inc.",
+                    "date": "Sep 03 (Thu)",
+                    "timing": "AMC (After Close)",
+                    "price": 57.00,
+                    "eps_est": 0.80,
+                    "market_cap_b": 11.8,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-9",
+                    "ticker": "IBIT",
+                    "company": "iShares Bitcoin Trust ETF",
+                    "date": "Weekly Macro / ETF",
+                    "timing": "Weekly Tracker (Mon-Fri)",
+                    "price": 34.80,
+                    "eps_est": None,
+                    "market_cap_b": 21.5,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-10",
+                    "ticker": "USO",
+                    "company": "United States Oil Fund",
+                    "date": "Weekly Macro / ETF",
+                    "timing": "Weekly Tracker (Mon-Fri)",
+                    "price": 74.50,
+                    "eps_est": None,
+                    "market_cap_b": 1.4,
+                    "actual_dir": None,
+                    "actual_pct": None,
+                    "votes": {}
+                },
+                {
+                    "id": "s-w35-11",
+                    "ticker": "QQQ",
+                    "company": "Invesco QQQ Trust ETF",
+                    "date": "Weekly Macro / ETF",
+                    "timing": "Weekly Tracker (Mon-Fri)",
+                    "price": 475.00,
+                    "eps_est": None,
+                    "market_cap_b": 280.0,
                     "actual_dir": None,
                     "actual_pct": None,
                     "votes": {}
@@ -343,27 +460,33 @@ DEFAULT_DATA = {
     ]
 }
 
-SCHEMA_VERSION = "v3"
+SCHEMA_VERSION = "v4"
 DATA_FILE = os.path.join(os.path.dirname(__file__), f"league_data_{SCHEMA_VERSION}.json")
 SUPABASE_TABLE = "earningsbeat_state"
 
 def _merge_defaults(saved):
-    """Merge default weeks into saved data and prune explicitly removed tickers."""
-    removed_tickers = {"AVGO"}
-    for w in saved.get("weeks", []):
-        w["stocks"] = [s for s in w.get("stocks", []) if s.get("ticker") not in removed_tickers]
-        # Ensure INTU date is cleanly Aug 25 (Tue)
-        for s in w.get("stocks", []):
-            if s.get("ticker") == "INTU" and "/" in s.get("date", ""):
-                s["date"] = "Aug 25 (Tue)"
-
+    """Merge default weeks into saved data while preserving user votes & custom stock additions."""
     for def_week in DEFAULT_DATA["weeks"]:
         saved_week = next((w for w in saved.get("weeks", []) if w["id"] == def_week["id"]), None)
         if saved_week:
-            existing_tickers = {s["ticker"] for s in saved_week.get("stocks", [])}
-            for s in def_week.get("stocks", []):
-                if s["ticker"] not in existing_tickers and s["ticker"] not in removed_tickers:
-                    saved_week["stocks"].append(s)
+            # Sync metadata / name
+            saved_week["name"] = def_week["name"]
+            saved_week["date_range"] = def_week["date_range"]
+            
+            existing_stocks_by_ticker = {s["ticker"]: s for s in saved_week.get("stocks", [])}
+            for def_s in def_week.get("stocks", []):
+                t = def_s["ticker"]
+                if t in existing_stocks_by_ticker:
+                    s_curr = existing_stocks_by_ticker[t]
+                    # Update company, date, timing, eps_est from defaults if missing or updated
+                    s_curr["company"] = def_s.get("company", s_curr.get("company"))
+                    s_curr["date"] = def_s.get("date", s_curr.get("date"))
+                    s_curr["timing"] = def_s.get("timing", s_curr.get("timing"))
+                    if s_curr.get("actual_dir") is None and def_s.get("actual_dir") is not None:
+                        s_curr["actual_dir"] = def_s["actual_dir"]
+                        s_curr["actual_pct"] = def_s.get("actual_pct")
+                else:
+                    saved_week.setdefault("stocks", []).append(def_s)
         else:
             saved.setdefault("weeks", []).append(def_week)
     return saved
@@ -577,19 +700,19 @@ if active_user_id is None:
     st.error("👆 **Please select who you are** from the dropdown above to cast your predictions.")
 
 
-# Protected Controls: Add Member & Add Custom Stock/ETF - ONLY visible if passcode unlocked
+# Protected Controls: Add Member, Add Custom Stock/ETF, & Resolve Outcomes - ONLY visible if passcode unlocked
 if st.session_state.authenticated:
-    c_ctrl1, c_ctrl2 = st.columns(2)
+    c_ctrl1, c_ctrl2, c_ctrl3 = st.columns(3)
     with c_ctrl1:
-        with st.expander("👤 Add Member to League", expanded=False):
+        with st.expander("👤 Add Member", expanded=False):
             with st.form("add_user_form", clear_on_submit=True):
                 u_col1, u_col2 = st.columns([2, 1])
                 with u_col1:
-                    new_friend_name = st.text_input("Friend's Display Name")
+                    new_friend_name = st.text_input("Display Name")
                 with u_col2:
-                    new_friend_avatar = st.selectbox("Avatar Icon", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄", "🦅", "🦈"])
+                    new_friend_avatar = st.selectbox("Avatar", ["🦁", "🚀", "🐺", "🦉", "⚡", "🎯", "💎", "🔥", "👑", "🦊", "🐻", "🦄", "🦅", "🦈"])
                 
-                if st.form_submit_button("➕ Add to League"):
+                if st.form_submit_button("➕ Add Member"):
                     if new_friend_name.strip():
                         new_user = {
                             "id": f"user-{int(datetime.now().timestamp()*1000)}",
@@ -598,16 +721,17 @@ if st.session_state.authenticated:
                         }
                         data["users"].append(new_user)
                         save_data(data)
-                        st.success(f"Added {new_friend_name} to the league!")
+                        st.success(f"Added {new_friend_name}!")
                         st.rerun()
 
     with c_ctrl2:
-        with st.expander("📊 Add Custom Stock / ETF to Track", expanded=False):
+        with st.expander("📊 Add Ticker", expanded=False):
             with st.form("add_custom_ticker_form", clear_on_submit=True):
-                new_t_input = st.text_input("Ticker (e.g. IBIT, USO, SPY, TSLA, GLD)").upper().strip()
+                new_t_input = st.text_input("Ticker (e.g. TSLA, NVDA)").upper().strip()
                 t_type = st.selectbox("Category", ["Weekly Macro / ETF", "Weekly Stock Tracker", "Earnings Matchup (AMC)", "Earnings Matchup (BMO)"])
+                target_w_name = st.selectbox("Target Week", [w["name"] for w in data["weeks"]])
                 
-                if st.form_submit_button("➕ Add Ticker to Lineup"):
+                if st.form_submit_button("➕ Add Ticker"):
                     if new_t_input:
                         try:
                             t_info = yf.Ticker(new_t_input).info or {}
@@ -617,10 +741,10 @@ if st.session_state.authenticated:
                             c_mkt_cap_b = round(c_mkt_cap / 1e9, 1) if c_mkt_cap else 0
                             c_eps = t_info.get("forwardEps") or t_info.get("trailingEps") or None
 
-                            active_week = data["weeks"][0]
-                            if not any(s["ticker"] == new_t_input for s in active_week.get("stocks", [])):
+                            target_w = next(w for w in data["weeks"] if w["name"] == target_w_name)
+                            if not any(s["ticker"] == new_t_input for s in target_w.get("stocks", [])):
                                 is_macro = "Macro" in t_type or "Tracker" in t_type
-                                active_week.setdefault("stocks", []).append({
+                                target_w.setdefault("stocks", []).append({
                                     "id": f"s-custom-{int(datetime.now().timestamp()*1000)}",
                                     "ticker": new_t_input,
                                     "company": c_name,
@@ -635,12 +759,46 @@ if st.session_state.authenticated:
                                     "notes": {}
                                 })
                                 save_data(data)
-                                st.success(f"✅ Added {new_t_input} ({c_name}) to weekly slate!")
+                                st.success(f"✅ Added {new_t_input} to {target_w['name']}!")
                                 st.rerun()
                             else:
-                                st.info(f"{new_t_input} is already in the lineup.")
+                                st.info(f"{new_t_input} is already in {target_w_name}.")
                         except Exception as e:
                             st.error(f"Error adding ticker {new_t_input}: {e}")
+
+    with c_ctrl3:
+        with st.expander("⚖️ Resolve Outcomes (Win/Loss)", expanded=False):
+            res_week_names = [w["name"] for w in data["weeks"]]
+            sel_res_w_name = st.selectbox("Week to Grade:", res_week_names, key="sel_res_w")
+            sel_res_w = next(w for w in data["weeks"] if w["name"] == sel_res_w_name)
+            
+            with st.form("resolve_outcomes_form"):
+                st.caption("Set official Friday outcomes to compute win/loss records:")
+                res_stock_list = sel_res_w.get("stocks", [])
+                temp_results = {}
+                for s in res_stock_list:
+                    cur_dir = s.get("actual_dir") or "None"
+                    cur_pct = s.get("actual_pct") if s.get("actual_pct") is not None else 0.0
+                    
+                    r_c1, r_c2, r_c3 = st.columns([1.5, 2, 2])
+                    with r_c1:
+                        st.markdown(f"**{s['ticker']}**")
+                    with r_c2:
+                        dir_opts = ["None", "UP", "NEUTRAL", "DOWN"]
+                        dir_idx = dir_opts.index(cur_dir) if cur_dir in dir_opts else 0
+                        new_dir = st.selectbox("Dir", dir_opts, index=dir_idx, key=f"res_dir_{s['id']}", label_visibility="collapsed")
+                    with r_c3:
+                        new_pct = st.number_input("% Chg", value=float(cur_pct), step=0.1, format="%.1f", key=f"res_pct_{s['id']}", label_visibility="collapsed")
+                    temp_results[s["id"]] = (new_dir, new_pct)
+                    
+                if st.form_submit_button("💾 Save Official Results"):
+                    for s in res_stock_list:
+                        d_val, p_val = temp_results[s["id"]]
+                        s["actual_dir"] = None if d_val == "None" else d_val
+                        s["actual_pct"] = p_val if d_val != "None" else None
+                    save_data(data)
+                    st.success("✅ Recorded official outcomes & updated leaderboard!")
+                    st.rerun()
 
 st.divider()
 
@@ -650,10 +808,35 @@ tab_matchups, tab_leaderboard = st.tabs([
     "🏆 Friends Leaderboard"
 ])
 
+# Determine default week index dynamically based on current date
+def get_current_week_index(weeks_list):
+    now = datetime.now()
+    cur_year, cur_week_num, _ = now.isocalendar()
+    
+    # 1. Match by week number string in id (e.g. week-2026-35)
+    week_target_id = f"week-{cur_year}-{cur_week_num:02d}"
+    for idx, w in enumerate(weeks_list):
+        if w["id"] == week_target_id or f"-{cur_week_num}" in w["id"]:
+            return idx
+            
+    # 2. Match by week title string
+    for idx, w in enumerate(weeks_list):
+        if f"Week {cur_week_num}" in w["name"]:
+            return idx
+            
+    return 0
+
 # Tab 1: Weekly Matchups & Voting
 with tab_matchups:
-    weeks_dict = {w["name"]: w["id"] for w in data["weeks"]}
-    selected_week_name = st.selectbox("📅 Select Week Round:", list(weeks_dict.keys()), index=0)
+    weeks_list = data["weeks"]
+    weeks_dict = {w["name"]: w["id"] for w in weeks_list}
+    default_week_idx = get_current_week_index(weeks_list)
+    
+    selected_week_name = st.selectbox(
+        "📅 Select Week Round:", 
+        list(weeks_dict.keys()), 
+        index=default_week_idx
+    )
     current_week = next(w for w in data["weeks"] if w["id"] == weeks_dict[selected_week_name])
     
     stocks = current_week.get("stocks", [])
@@ -686,6 +869,10 @@ with tab_matchups:
             eps_str = f"${stock.get('eps_est'):.2f}" if stock.get("eps_est") else "—"
             cap_str = f"${stock.get('market_cap_b', '')}B" if stock.get("market_cap_b") else ""
 
+            # Check outcome
+            actual_dir = stock.get("actual_dir")
+            actual_pct = stock.get("actual_pct")
+
             # Friend picks chips & notes
             chips = []
             notes = stock.get("notes", {})
@@ -695,10 +882,19 @@ with tab_matchups:
                 if uid in votes or uid in notes:
                     v = votes.get(uid)
                     v_icon = "🟢" if v == "UP" else ("🔴" if v == "DOWN" else ("⚪" if v == "NEUTRAL" else "⏭️"))
+                    
+                    # Add win/loss indicator for friends if resolved
+                    res_tag = ""
+                    if actual_dir and v and v != "SKIP":
+                        if v == actual_dir:
+                            res_tag = " <span style='color:#4ade80; font-weight:700;'>[WIN +10pts]</span>"
+                        else:
+                            res_tag = " <span style='color:#f87171; font-weight:700;'>[LOSS]</span>"
+                            
                     u_note = f' — "{notes[uid]}"' if uid in notes and notes[uid].strip() else ""
-                    chips.append(f"{u['avatar']} **{u_name}** {v_icon}{u_note}")
+                    chips.append(f"{u['avatar']} **{u_name}** {v_icon}{res_tag}{u_note}")
 
-            # Vote label
+            # Vote label & My Result
             if my_vote == "UP":
                 my_vote_label = "🟢 You picked UP"
             elif my_vote == "DOWN":
@@ -713,11 +909,15 @@ with tab_matchups:
             # Lock check: Can change vote freely until 1 hour before earnings cutoff
             is_locked, lock_reason = is_stock_locked(stock)
             
-            # Can vote/change only if authenticated, user selected, and cutoff hasn't passed
-            can_vote = st.session_state.authenticated and bool(active_user_id) and not is_locked
+            # Can vote/change only if authenticated, user selected, not resolved, and cutoff hasn't passed
+            can_vote = st.session_state.authenticated and bool(active_user_id) and not is_locked and actual_dir is None
 
             # Status badge for card
-            if is_locked:
+            if actual_dir:
+                pct_str = f" ({actual_pct:+.1f}%)" if actual_pct is not None else ""
+                dir_color = "#4ade80" if actual_dir == "UP" else ("#f87171" if actual_dir == "DOWN" else "#94a3b8")
+                status_badge = f"<span style='color:{dir_color}; font-weight:800;'>🏁 Resolved: {actual_dir}{pct_str}</span>"
+            elif is_locked:
                 status_badge = f"<span style='color:#f87171; font-weight:700;'>🔒 {lock_reason}</span>"
             elif my_vote == "SKIP":
                 status_badge = "<span style='color:#94a3b8; font-weight:600;'>⏭️ Skipped</span>"
@@ -725,6 +925,18 @@ with tab_matchups:
                 status_badge = "<span style='color:#38bdf8; font-weight:600;'>✏️ Pick Saved (Editable until cutoff)</span>"
             else:
                 status_badge = "<span style='color:#4ade80; font-weight:600;'>🟢 Voting Open</span>"
+
+            # Personal Win / Loss banner on card
+            my_result_html = ""
+            if actual_dir and my_vote:
+                if my_vote == "SKIP":
+                    my_result_html = "<div style='margin-top:8px; font-size:0.85rem; font-weight:700; color:#94a3b8;'>⏭️ Result: Skipped (No points scored)</div>"
+                elif my_vote == actual_dir:
+                    my_result_html = f"<div style='margin-top:8px; font-size:0.88rem; font-weight:800; color:#4ade80;'>🎉 WON! +10 Points (You picked {my_vote} and stock went {actual_dir})</div>"
+                else:
+                    my_result_html = f"<div style='margin-top:8px; font-size:0.88rem; font-weight:800; color:#f87171;'>❌ LOSS (You picked {my_vote} but stock went {actual_dir})</div>"
+            elif my_vote_label:
+                my_result_html = f"<div style='margin-top:8px; font-size:0.82rem; font-weight:600; color:#38bdf8;'>{my_vote_label}</div>"
 
             # Render comments HTML inside card
             notes_html = ""
@@ -762,7 +974,7 @@ with tab_matchups:
         <div><span style="color:#94a3b8; font-size:0.75rem;">VOTES</span><br><span style="font-weight:700; color:#f8fafc;">🟢{up_votes} ⚪{neutral_votes} 🔴{down_votes}</span></div>
     </div>
     {notes_html}
-    {"<div style='margin-top:8px; font-size:0.82rem; font-weight:600; color:#38bdf8;'>" + my_vote_label + "</div>" if my_vote_label else ""}
+    {my_result_html}
 </div>
 """, unsafe_allow_html=True)
 
@@ -794,7 +1006,7 @@ with tab_matchups:
                     st.rerun()
 
             # Thoughts & Analysis note box (Feature 1)
-            if st.session_state.authenticated and active_user_id and not is_locked:
+            if st.session_state.authenticated and active_user_id and not is_locked and actual_dir is None:
                 cur_note = stock.setdefault("notes", {}).get(active_user_id, "")
                 with st.expander("💬 Add Your Thought / Reason / Price Target", expanded=bool(cur_note)):
                     c_txt, c_btn = st.columns([4, 1])
