@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import json
 import os
+import copy
+import re
 from datetime import datetime, timedelta
 import yfinance as yf
 
@@ -534,9 +536,170 @@ def is_stock_locked(stock):
     return False, ""
 
 
+def parse_week_dates(w):
+    """Parses week date_range or name string into (start_dt, end_dt) where end_dt covers through Sunday night."""
+    text = w.get("date_range") or w.get("name", "")
+    paren = re.search(r"\(([^)]+)\)", text)
+    if paren:
+        text = paren.group(1)
+        
+    parts = text.split("-")
+    if len(parts) >= 2:
+        start_part = parts[0].strip()
+        end_part = parts[1].strip()
+        
+        year_match = re.search(r"\b(20\d\d)\b", end_part) or re.search(r"\b(20\d\d)\b", start_part)
+        def_year = int(year_match.group(1)) if year_match else datetime.now().year
+        
+        months = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, 
+                  "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
+
+        def parse_dt(part, fallback_year):
+            m_m = re.search(r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)", part, re.I)
+            d_m = re.search(r"\b(\d{1,2})\b", part)
+            y_m = re.search(r"\b(20\d\d)\b", part)
+            if not m_m or not d_m:
+                return None
+            m = months[m_m.group(1).lower()]
+            d = int(d_m.group(1))
+            y = int(y_m.group(1)) if y_m else fallback_year
+            return datetime(y, m, d)
+
+        s_dt = parse_dt(start_part, def_year)
+        e_dt = parse_dt(end_part, def_year)
+        if s_dt and e_dt:
+            # e_dt is Friday; end of round extends through Sunday 23:59:59 (+2 days)
+            e_dt = e_dt.replace(hour=23, minute=59, second=59) + timedelta(days=2)
+            return s_dt, e_dt
+            
+    return None, None
+
+
+def get_current_week_index(weeks_list):
+    """Dynamically determine the index of the active week round based on actual calendar dates."""
+    if not weeks_list:
+        return 0
+    now = datetime.now()
+    
+    parsed = []
+    for idx, w in enumerate(weeks_list):
+        s_dt, e_dt = parse_week_dates(w)
+        parsed.append((idx, w, s_dt, e_dt))
+        
+    # 1. If Sunday afternoon (>= 12 PM), check if next week starts tomorrow Monday
+    if now.weekday() == 6 and now.hour >= 12:
+        for idx, w, s_dt, e_dt in parsed:
+            if s_dt and (s_dt.date() - now.date()).days == 1:
+                return idx
+
+    # 2. Match if now is within [s_dt, e_dt] (Monday 00:00 to Sunday 23:59)
+    for idx, w, s_dt, e_dt in parsed:
+        if s_dt and e_dt and s_dt <= now <= e_dt:
+            return idx
+            
+    # 3. Match if now is on the weekend immediately preceding a week
+    for idx, w, s_dt, e_dt in parsed:
+        if s_dt and (s_dt - timedelta(days=2)) <= now < s_dt:
+            return idx
+
+    # 4. If now is past all defined weeks, default to the latest week (last index)
+    valid_with_dates = [(idx, e_dt) for idx, w, s_dt, e_dt in parsed if e_dt]
+    if valid_with_dates:
+        latest_idx, latest_end = max(valid_with_dates, key=lambda x: x[1])
+        if now > latest_end:
+            return latest_idx
+            
+    # 5. If now is before all defined weeks, default to the earliest week
+    if valid_with_dates:
+        earliest_idx, earliest_start = min([(idx, s_dt) for idx, w, s_dt, e_dt in parsed if s_dt], key=lambda x: x[1])
+        if now < earliest_start:
+            return earliest_idx
+            
+    # 6. Fallback: closest week by time
+    if valid_with_dates:
+        closest_idx, _ = min(valid_with_dates, key=lambda x: abs((x[1] - now).total_seconds()))
+        return closest_idx
+
+    return max(0, len(weeks_list) - 1)
+
+
+def ensure_current_week(data):
+    """Ensures the current calendar week round exists in data so users can immediately view and vote on it."""
+    now = datetime.now()
+    mon = now.date() - timedelta(days=now.weekday())
+    fri = mon + timedelta(days=4)
+    iso_year, iso_week, _ = now.isocalendar()
+    
+    cur_id = f"week-{iso_year}-{iso_week:02d}"
+    weeks = data.setdefault("weeks", [])
+    
+    # Check if a week already covers current date or has matching id
+    for w in weeks:
+        if w.get("id") == cur_id:
+            return False
+        s_dt, e_dt = parse_week_dates(w)
+        if s_dt and e_dt and s_dt <= now <= e_dt:
+            return False
+            
+    # Create new current week round with default macro tracking ETFs
+    new_w = {
+        "id": cur_id,
+        "name": f"Week {iso_week} ({mon.strftime('%b %d')} - {fri.strftime('%b %d, %Y')})",
+        "date_range": f"{mon.strftime('%b %d')} - {fri.strftime('%b %d, %Y')}",
+        "stocks": [
+            {
+                "id": f"s-w{iso_week}-1",
+                "ticker": "SPY",
+                "company": "SPDR S&P 500 ETF Trust",
+                "date": "Weekly Macro / ETF",
+                "timing": "Weekly Tracker (Mon-Fri)",
+                "price": None,
+                "eps_est": None,
+                "market_cap_b": 560.0,
+                "actual_dir": None,
+                "actual_pct": None,
+                "votes": {},
+                "notes": {}
+            },
+            {
+                "id": f"s-w{iso_week}-2",
+                "ticker": "QQQ",
+                "company": "Invesco QQQ Trust ETF",
+                "date": "Weekly Macro / ETF",
+                "timing": "Weekly Tracker (Mon-Fri)",
+                "price": None,
+                "eps_est": None,
+                "market_cap_b": 280.0,
+                "actual_dir": None,
+                "actual_pct": None,
+                "votes": {},
+                "notes": {}
+            },
+            {
+                "id": f"s-w{iso_week}-3",
+                "ticker": "IBIT",
+                "company": "iShares Bitcoin Trust ETF",
+                "date": "Weekly Macro / ETF",
+                "timing": "Weekly Tracker (Mon-Fri)",
+                "price": None,
+                "eps_est": None,
+                "market_cap_b": 22.0,
+                "actual_dir": None,
+                "actual_pct": None,
+                "votes": {},
+                "notes": {}
+            }
+        ]
+    }
+    weeks.append(new_w)
+    return True
+
+
 def get_supabase():
     try:
         from supabase import create_client
+        if "supabase" not in st.secrets:
+            return None
         url = st.secrets["supabase"]["url"]
         key = st.secrets["supabase"]["key"]
         return create_client(url, key)
@@ -552,10 +715,13 @@ def load_data():
             if resp.data and len(resp.data) > 0:
                 # Row found — load from Supabase
                 saved = json.loads(resp.data[0]["state_json"])
-                return _merge_defaults(saved)
+                data = _merge_defaults(saved)
+                ensure_current_week(data)
+                return data
             else:
                 # Table is empty — seed it with default data right now
-                seed = _merge_defaults(dict(DEFAULT_DATA))
+                seed = _merge_defaults(copy.deepcopy(DEFAULT_DATA))
+                ensure_current_week(seed)
                 sb.table(SUPABASE_TABLE).upsert({
                     "id": 1,
                     "state_json": json.dumps(seed),
@@ -569,11 +735,15 @@ def load_data():
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, "r") as f:
-                return _merge_defaults(json.load(f))
+                data = _merge_defaults(json.load(f))
+                ensure_current_week(data)
+                return data
         except Exception:
             pass
 
-    return DEFAULT_DATA
+    data = copy.deepcopy(DEFAULT_DATA)
+    ensure_current_week(data)
+    return data
 
 def save_data(data):
     # Always write local backup
@@ -638,7 +808,10 @@ def sync_daily_stock_data(data):
             save_data(data)
 
 # Vote Authentication Password
-VOTE_PASSWORD = st.secrets.get("app", {}).get("passcode", "stock2026")
+try:
+    VOTE_PASSWORD = st.secrets.get("app", {}).get("passcode", "stock2026")
+except Exception:
+    VOTE_PASSWORD = "stock2026"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -700,9 +873,9 @@ if active_user_id is None:
     st.error("👆 **Please select who you are** from the dropdown above to cast your predictions.")
 
 
-# Protected Controls: Add Member, Add Custom Stock/ETF, & Resolve Outcomes - ONLY visible if passcode unlocked
+# Protected Controls: Add Member, Add Week, Add Custom Stock/ETF, & Resolve Outcomes - ONLY visible if passcode unlocked
 if st.session_state.authenticated:
-    c_ctrl1, c_ctrl2, c_ctrl3 = st.columns(3)
+    c_ctrl1, c_ctrl2, c_ctrl3, c_ctrl4 = st.columns(4)
     with c_ctrl1:
         with st.expander("👤 Add Member", expanded=False):
             with st.form("add_user_form", clear_on_submit=True):
@@ -725,11 +898,58 @@ if st.session_state.authenticated:
                         st.rerun()
 
     with c_ctrl2:
+        with st.expander("📅 Add Week", expanded=False):
+            with st.form("add_week_round_form", clear_on_submit=True):
+                now_dt = datetime.now()
+                # Default to next week's Monday
+                next_mon = (now_dt + timedelta(days=(7 - now_dt.weekday()))).date()
+                picked_mon = st.date_input("Week Starting Monday", value=next_mon)
+                picked_fri = picked_mon + timedelta(days=4)
+                w_iso_year, w_iso_week, _ = picked_mon.isocalendar()
+                w_title = st.text_input(
+                    "Round Name", 
+                    value=f"Week {w_iso_week} ({picked_mon.strftime('%b %d')} - {picked_fri.strftime('%b %d, %Y')})"
+                )
+                
+                if st.form_submit_button("➕ Create Week Round"):
+                    w_id = f"week-{w_iso_year}-{w_iso_week:02d}"
+                    if not any(w["id"] == w_id for w in data["weeks"]):
+                        new_week_obj = {
+                            "id": w_id,
+                            "name": w_title.strip(),
+                            "date_range": f"{picked_mon.strftime('%b %d')} - {picked_fri.strftime('%b %d, %Y')}",
+                            "stocks": [
+                                {
+                                    "id": f"s-w{w_iso_week}-1",
+                                    "ticker": "SPY",
+                                    "company": "SPDR S&P 500 ETF Trust",
+                                    "date": "Weekly Macro / ETF",
+                                    "timing": "Weekly Tracker (Mon-Fri)",
+                                    "price": None,
+                                    "eps_est": None,
+                                    "market_cap_b": 560.0,
+                                    "actual_dir": None,
+                                    "actual_pct": None,
+                                    "votes": {},
+                                    "notes": {}
+                                }
+                            ]
+                        }
+                        data["weeks"].append(new_week_obj)
+                        save_data(data)
+                        st.success(f"✅ Created {w_title}!")
+                        st.rerun()
+                    else:
+                        st.info(f"Week {w_iso_week} already exists.")
+
+    with c_ctrl3:
         with st.expander("📊 Add Ticker", expanded=False):
             with st.form("add_custom_ticker_form", clear_on_submit=True):
                 new_t_input = st.text_input("Ticker (e.g. TSLA, NVDA)").upper().strip()
                 t_type = st.selectbox("Category", ["Weekly Macro / ETF", "Weekly Stock Tracker", "Earnings Matchup (AMC)", "Earnings Matchup (BMO)"])
-                target_w_name = st.selectbox("Target Week", [w["name"] for w in data["weeks"]])
+                curr_w_idx = get_current_week_index(data["weeks"])
+                curr_w_idx = min(max(0, curr_w_idx), len(data["weeks"]) - 1) if data["weeks"] else 0
+                target_w_name = st.selectbox("Target Week", [w["name"] for w in data["weeks"]], index=curr_w_idx)
                 
                 if st.form_submit_button("➕ Add Ticker"):
                     if new_t_input:
@@ -766,10 +986,12 @@ if st.session_state.authenticated:
                         except Exception as e:
                             st.error(f"Error adding ticker {new_t_input}: {e}")
 
-    with c_ctrl3:
-        with st.expander("⚖️ Resolve Outcomes (Win/Loss)", expanded=False):
+    with c_ctrl4:
+        with st.expander("⚖️ Grade Outcomes", expanded=False):
             res_week_names = [w["name"] for w in data["weeks"]]
-            sel_res_w_name = st.selectbox("Week to Grade:", res_week_names, key="sel_res_w")
+            curr_w_idx = get_current_week_index(data["weeks"])
+            curr_w_idx = min(max(0, curr_w_idx), len(res_week_names) - 1) if res_week_names else 0
+            sel_res_w_name = st.selectbox("Week to Grade:", res_week_names, index=curr_w_idx, key="sel_res_w")
             sel_res_w = next(w for w in data["weeks"] if w["name"] == sel_res_w_name)
             
             with st.form("resolve_outcomes_form"):
@@ -808,35 +1030,32 @@ tab_matchups, tab_leaderboard = st.tabs([
     "🏆 Friends Leaderboard"
 ])
 
-# Determine default week index dynamically based on current date
-def get_current_week_index(weeks_list):
-    now = datetime.now()
-    cur_year, cur_week_num, _ = now.isocalendar()
-    
-    # 1. Match by week number string in id (e.g. week-2026-35)
-    week_target_id = f"week-{cur_year}-{cur_week_num:02d}"
-    for idx, w in enumerate(weeks_list):
-        if w["id"] == week_target_id or f"-{cur_week_num}" in w["id"]:
-            return idx
-            
-    # 2. Match by week title string
-    for idx, w in enumerate(weeks_list):
-        if f"Week {cur_week_num}" in w["name"]:
-            return idx
-            
-    return 0
-
 # Tab 1: Weekly Matchups & Voting
 with tab_matchups:
     weeks_list = data["weeks"]
     weeks_dict = {w["name"]: w["id"] for w in weeks_list}
+    week_names = list(weeks_dict.keys())
     default_week_idx = get_current_week_index(weeks_list)
+    default_week_idx = min(max(0, default_week_idx), len(week_names) - 1) if week_names else 0
     
-    selected_week_name = st.selectbox(
-        "📅 Select Week Round:", 
-        list(weeks_dict.keys()), 
-        index=default_week_idx
-    )
+    # Initialize session state for selected week round if not present or invalid
+    if "selected_week_round" not in st.session_state or st.session_state["selected_week_round"] not in week_names:
+        st.session_state["selected_week_round"] = week_names[default_week_idx]
+
+    w_col1, w_col2 = st.columns([4.2, 1.2])
+    with w_col1:
+        selected_week_name = st.selectbox(
+            "📅 Select Week Round:", 
+            week_names, 
+            key="selected_week_round"
+        )
+    with w_col2:
+        st.markdown("<div style='margin-top:28px'></div>", unsafe_allow_html=True)
+        is_already_current = (selected_week_name == week_names[default_week_idx])
+        if st.button("📍 Current Week", use_container_width=True, disabled=is_already_current, help="Jump to the active current week"):
+            st.session_state["selected_week_round"] = week_names[default_week_idx]
+            st.rerun()
+
     current_week = next(w for w in data["weeks"] if w["id"] == weeks_dict[selected_week_name])
     
     stocks = current_week.get("stocks", [])

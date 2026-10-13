@@ -1,0 +1,416 @@
+{
+  "users": [
+    {
+      "id": "user-1",
+      "name": "Jay",
+      "avatar": "\ud83e\udd81"
+    },
+    {
+      "id": "user-2",
+      "name": "Stan",
+      "avatar": "\ud83d\ude80"
+    },
+    {
+      "id": "user-3",
+      "name": "Edwin",
+      "avatar": "\ud83d\udc3a"
+    }
+  ],
+  "weeks": [
+    {
+      "id": "week-2026-34",
+      "name": "Week 34 (Aug 24 - Aug 28, 2026)",
+      "date_range": "Aug 24 - Aug 28, 2026",
+      "stocks": [
+        {
+          "id": "s-1",
+          "ticker": "INTU",
+          "company": "Intuit Inc.",
+          "date": "Aug 25 (Tue)",
+          "timing": "AMC (After Close)",
+          "price": 305.99,
+          "eps_est": 27.0764,
+          "market_cap_b": 81.8,
+          "actual_dir": "UP",
+          "actual_pct": 3.2,
+          "votes": {}
+        },
+        {
+          "id": "s-2",
+          "ticker": "SNPS",
+          "company": "Synopsys, Inc.",
+          "date": "Aug 26 (Wed)",
+          "timing": "AMC (After Close)",
+          "price": 502.51,
+          "eps_est": 18.64419,
+          "market_cap_b": 96.3,
+          "actual_dir": "UP",
+          "actual_pct": 1.8,
+          "votes": {}
+        },
+        {
+          "id": "s-3",
+          "ticker": "NVDA",
+          "company": "NVIDIA Corporation",
+          "date": "Aug 26 (Wed)",
+          "timing": "AMC (After Close)",
+          "price": 226.32,
+          "eps_est": 15.9146,
+          "market_cap_b": 5464.9,
+          "actual_dir": "DOWN",
+          "actual_pct": -6.4,
+          "votes": {}
+        },
+        {
+          "id": "s-4",
+          "ticker": "CRWD",
+          "company": "CrowdStrike Holdings",
+          "date": "Aug 27 (Thu)",
+          "timing": "AMC (After Close)",
+          "price": 263.01,
+          "eps_est": 1.60591,
+          "market_cap_b": 269.3,
+          "actual_dir": "UP",
+          "actual_pct": 2.1,
+          "votes": {}
+        },
+        {
+          "id": "s-5",
+          "ticker": "SNOW",
+          "company": "Snowflake Inc",
+          "date": "Aug 27 (Thu)",
+          "timing": "AMC (After Close)",
+          "price": 360.37,
+          "eps_est": 3.0052,
+          "market_cap_b": 127.1,
+          "actual_dir": "DOWN",
+          "actual_pct": -14.7,
+          "votes": {}
+        },
+        {
+          "id": "s-6",
+          "ticker": "CRM",
+          "company": "Salesforce, Inc.",
+          "date": "Aug 28 (Wed/Thu)",
+          "timing": "AMC (After Close)",
+          "price": 233.92,
+          "eps_est": 16.02297,
+          "market_cap_b": 192.5,
+          "actual_dir": "UP",
+          "actual_pct": 0.9,
+          "votes": {}
+        },
+        {
+          "id": "s-7",
+          "ticker": "DELL",
+          "company": "Dell Technologies",
+          "date": "Aug 28 (Thu/Fri)",
+          "timing": "AMC (After Close)",
+          "price": 576.76,
+          "eps_est": 29.11713,
+          "market_cap_b": 366.7,
+          "actual_dir": "UP",
+          "actual_pct": 4.3,
+          "votes": {}
+        },
+        {
+          "id": "s-8",
+          "ticker": "PDD",
+          "company": "PDD Holdings (Temu)",
+          "date": "Aug 28 (Fri)",
+          "timing": "BMO (Before Open)",
+          "price": 80.92,
+          "eps_est": 12.339074,
+          "market_cap_b": 115.2,
+          "actual_dir": "DOWN",
+          "actual_pct": -28.5,
+          "votes": {}
+        },
+        {
+          "id": "s-9",
+          "ticker": "IBIT",
+          "company": "iShares Bitcoin Trust ETF",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 46.55,
+          "eps_est": null,
+          "market_cap_b": 22.5,
+          "actual_dir": "DOWN",
+          "actual_pct": -4.2,
+          "votes": {}
+        },
+        {
+          "id": "s-10",
+          "ticker": "USO",
+          "company": "United States Oil Fund",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 148.2,
+          "eps_est": null,
+          "market_cap_b": 1.4,
+          "actual_dir": "DOWN",
+          "actual_pct": -1.5,
+          "votes": {}
+        },
+        {
+          "id": "s-11",
+          "ticker": "LOW",
+          "company": "Lowe's Companies, Inc.",
+          "date": "Weekly Stock Tracker",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 185.57,
+          "eps_est": 13.0,
+          "market_cap_b": 104.1,
+          "actual_dir": "UP",
+          "actual_pct": 1.2,
+          "votes": {}
+        }
+      ]
+    },
+    {
+      "id": "week-2026-35",
+      "name": "Week 35 (Aug 31 - Sep 04, 2026)",
+      "date_range": "Aug 31 - Sep 04, 2026",
+      "stocks": [
+        {
+          "id": "s-w35-1",
+          "ticker": "AVGO",
+          "company": "Broadcom Inc.",
+          "date": "Sep 02 (Wed)",
+          "timing": "AMC (After Close)",
+          "price": 354.73,
+          "eps_est": 19.39382,
+          "market_cap_b": 1693.3,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-2",
+          "ticker": "LULU",
+          "company": "Lululemon Athletica",
+          "date": "Sep 03 (Thu)",
+          "timing": "AMC (After Close)",
+          "price": 94.66,
+          "eps_est": 8.64621,
+          "market_cap_b": 11.0,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-3",
+          "ticker": "NIO",
+          "company": "NIO Inc.",
+          "date": "Sep 01 (Tue)",
+          "timing": "BMO (Before Open)",
+          "price": 3.47,
+          "eps_est": 0.1272563,
+          "market_cap_b": 8.7,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-4",
+          "ticker": "MDB",
+          "company": "MongoDB, Inc.",
+          "date": "Sep 01 (Tue)",
+          "timing": "AMC (After Close)",
+          "price": 381.29,
+          "eps_est": 7.83132,
+          "market_cap_b": 30.7,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-5",
+          "ticker": "GTLB",
+          "company": "GitLab Inc.",
+          "date": "Sep 01 (Tue)",
+          "timing": "AMC (After Close)",
+          "price": 56.01,
+          "eps_est": 1.03835,
+          "market_cap_b": 9.3,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-6",
+          "ticker": "HPE",
+          "company": "Hewlett Packard Enterprise",
+          "date": "Sep 02 (Wed)",
+          "timing": "AMC (After Close)",
+          "price": 70.33,
+          "eps_est": 4.70878,
+          "market_cap_b": 93.4,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-7",
+          "ticker": "ZS",
+          "company": "Zscaler, Inc.",
+          "date": "Sep 03 (Thu)",
+          "timing": "AMC (After Close)",
+          "price": 225.78,
+          "eps_est": 5.62336,
+          "market_cap_b": 36.8,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-8",
+          "ticker": "DOCU",
+          "company": "DocuSign, Inc.",
+          "date": "Sep 03 (Thu)",
+          "timing": "AMC (After Close)",
+          "price": 70.97,
+          "eps_est": 5.21004,
+          "market_cap_b": 13.3,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-9",
+          "ticker": "IBIT",
+          "company": "iShares Bitcoin Trust ETF",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 46.55,
+          "eps_est": null,
+          "market_cap_b": 21.5,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-10",
+          "ticker": "USO",
+          "company": "United States Oil Fund",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 148.2,
+          "eps_est": null,
+          "market_cap_b": 1.4,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w35-11",
+          "ticker": "QQQ",
+          "company": "Invesco QQQ Trust ETF",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 751.27,
+          "eps_est": null,
+          "market_cap_b": 280.0,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        }
+      ]
+    },
+    {
+      "id": "week-2026-36",
+      "name": "Week 36 (Sep 07 - Sep 11, 2026)",
+      "date_range": "Sep 07 - Sep 11, 2026",
+      "stocks": [
+        {
+          "id": "s-w36-1",
+          "ticker": "ORCL",
+          "company": "Oracle Corporation",
+          "date": "Sep 09 (Wed)",
+          "timing": "AMC (After Close)",
+          "price": 137.39,
+          "eps_est": 10.99899,
+          "market_cap_b": 416.5,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w36-2",
+          "ticker": "ADBE",
+          "company": "Adobe Inc.",
+          "date": "Sep 11 (Fri)",
+          "timing": "AMC (After Close)",
+          "price": 238.14,
+          "eps_est": 27.64194,
+          "market_cap_b": 92.7,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        },
+        {
+          "id": "s-w36-3",
+          "ticker": "KR",
+          "company": "Kroger Co.",
+          "date": "Sep 11 (Fri)",
+          "timing": "BMO (Before Open)",
+          "price": 62.56,
+          "eps_est": 5.50414,
+          "market_cap_b": 36.9,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {}
+        }
+      ]
+    },
+    {
+      "id": "week-2026-42",
+      "name": "Week 42 (Oct 12 - Oct 16, 2026)",
+      "date_range": "Oct 12 - Oct 16, 2026",
+      "stocks": [
+        {
+          "id": "s-w42-1",
+          "ticker": "SPY",
+          "company": "SPDR S&P 500 ETF Trust",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 778.57,
+          "eps_est": null,
+          "market_cap_b": 560.0,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {},
+          "notes": {}
+        },
+        {
+          "id": "s-w42-2",
+          "ticker": "QQQ",
+          "company": "Invesco QQQ Trust ETF",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 751.27,
+          "eps_est": null,
+          "market_cap_b": 280.0,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {},
+          "notes": {}
+        },
+        {
+          "id": "s-w42-3",
+          "ticker": "IBIT",
+          "company": "iShares Bitcoin Trust ETF",
+          "date": "Weekly Macro / ETF",
+          "timing": "Weekly Tracker (Mon-Fri)",
+          "price": 46.55,
+          "eps_est": null,
+          "market_cap_b": 22.0,
+          "actual_dir": null,
+          "actual_pct": null,
+          "votes": {},
+          "notes": {}
+        }
+      ]
+    }
+  ]
+}
